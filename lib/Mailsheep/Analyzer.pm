@@ -1,4 +1,4 @@
-package Tokenize;
+package Mailsheep::Analyzer;
 use v5.14;
 use strict;
 use Unicode::UCD qw(charscript);

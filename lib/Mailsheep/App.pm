@@ -1,8 +1,8 @@
 package Mailsheep::App;
 use v5.14;
 use Moo;
-use Tokenize;
-use MessageOrganizer;
+use Mailsheep::Analyzer;
+use Mailsheep::MessageOrganizer;
 
 use Encode qw(encode_utf8);
 use Digest::SHA1 qw(sha1_hex);
@@ -54,9 +54,9 @@ sub index_document {
     for my $field (keys %$doc) {
         my $fidx = $idx->{field}{$field} ||= {};
 
-        my $v = Tokenize::filter_characters($doc->{$field});
+        my $v = Mailsheep::Analyzer::filter_characters($doc->{$field});
 
-        my @tokens = ($v, Tokenize::standard($v));
+        my @tokens = ($v, Mailsheep::Analyzer::standard($v));
 
         $fidx->{tf} += @tokens;
         $idx->{tf}  += @tokens;
@@ -78,7 +78,7 @@ sub categorize_new_messages {
     my ($self) = @_;
 
     my $idx = $self->load_indices();
-    my $mo  = MessageOrganizer->new( idx => $idx );
+    my $mo  = Mailsheep::MessageOrganizer->new( idx => $idx );
 
     my $mgr = $self->mail_box_manager;
     my $folder_inbox = $mgr->open("=INBOX", access => "rw");

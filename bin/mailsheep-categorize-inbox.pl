@@ -11,7 +11,6 @@ use FindBin;
 use lib $FindBin::Bin . "/lib";
 
 use Mailsheep::App;
-use MessageOrganizer;
 
 my %opts;
 getopts('d:', \%opts);

@@ -1,13 +1,13 @@
 use v5.18;
 
-package MessageOrganizer {
+package Mailsheep::MessageOrganizer {
     use Moo;
     use Email::MIME;
     use Encode qw(decode_utf8 encode_utf8);
     use List::Util qw(max sum);
     use List::MoreUtils qw(uniq);
     use JSON;
-    use Tokenize;
+    use Mailsheep::Analyzer;
     my $json = JSON->new;
 
     has idx => (
@@ -26,8 +26,8 @@ package MessageOrganizer {
             next if $doc->{$field} eq '';
 
             my $category;
-            my $v = Tokenize::filter_characters($doc->{$field});
-            my @tokens = ($v, Tokenize::standard($v));
+            my $v = Mailsheep::Analyzer::filter_characters($doc->{$field});
+            my @tokens = ($v, Mailsheep::Analyzer::standard($v));
 
             my (%pc,%p);
             my $total_docs = sum(map { $_->{df} } values %$idx);
