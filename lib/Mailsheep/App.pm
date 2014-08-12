@@ -121,4 +121,21 @@ sub load_indices {
     return $idx;
 }
 
+sub subject_frequency {
+    my $self = shift;
+    my $box  = shift;
+
+    my %seen;
+    my $folder = $self->mail_box_manager->open("=${box}", access => "r");
+    my $count_message = $folder->messages;
+    for my $i (0..$count_message-1) {
+        my $message = $folder->message($i);
+        # next if $message->labels()->{seen};
+        my $subject = $message->head->study("subject") // "";
+        $seen{$subject}++;
+    }
+
+    return \%seen;
+}
+
 1;
