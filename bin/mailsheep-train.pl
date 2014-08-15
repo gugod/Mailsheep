@@ -15,19 +15,15 @@ my %opts;
 getopts('d:', \%opts);
 binmode STDOUT, ":utf8";
 
-my $index_directory = $opts{d} or die "-d /dir/of/index";
-mkdir( $index_directory ) unless -d $index_directory;
+my $app = Mailsheep::App->new(config_dir => "$ENV{HOME}/.config/mailsheep");
 
-my $app = Mailsheep::App->new(
-    maildir => "$ENV{HOME}/Maildir/",
-    indexdir => $opts{d},
-);
+my $index_directory = $app->config->{index_dir};
+mkdir( $index_directory ) unless -d $index_directory;
 
 my $sereal = Sereal::Encoder->new;
 
-for my $folder_name (@ARGV) {
+for my $folder_name (@{ $app->config->{category} }) {
     my $idx = $app->index_folder($folder_name);
-    
     $folder_name =~ s{\A(.*/)?([^/]+)\z}{$2};
     open my $fh, ">", File::Spec->catdir($index_directory, "${folder_name}.sereal");
     print $fh $sereal->encode($idx);

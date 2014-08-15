@@ -4,26 +4,35 @@ use Moo;
 use Mailsheep::Analyzer;
 use Mailsheep::MessageOrganizer;
 
+use File::Spec::Functions qw(catfile);
 use Encode qw(encode_utf8);
 use Digest::SHA1 qw(sha1_hex);
 use File::Basename qw(basename);
 use Mail::Box::Manager;
 
-has indexdir => (
-    is => "ro",
-    required => 1,
-);
-
-has maildir => (
-    is => "ro",
-    required => 1,
-);
+has config_dir => (is => "ro", required => 1);
+has config => (is => "lazy");
 
 has mail_box_manager => ( is => "lazy" );
 
 sub _build_mail_box_manager {
     my $self = shift;
-    return Mail::Box::Manager->new( folderdir => $self->maildir ),
+    return Mail::Box::Manager->new( folderdir => $self->config->{maildir} ),
+}
+
+sub _build_config {
+    my $self = shift;
+    my $config_file = catfile($self->config_dir, "config.json");
+    unless (-f $config_file) {
+        die "config file $config_file does not exist.";        
+    }
+
+    open(my $fh, "<", $config_file) or die $!;
+    local $/ = undef;
+    my $config_text = <$fh>;
+    close($fh);
+    my $json = JSON->new;
+    return $json->decode($config_text);
 }
 
 with 'Mailsheep::MailMessageConvertor';
@@ -108,7 +117,7 @@ sub categorize_new_messages {
 
 sub load_indices {
     my ($self) = @_;
-    my $index_directory = $self->indexdir;
+    my $index_directory = $self->config->{index_dir};
     my $idx = {};
     my $sereal = Sereal::Decoder->new;
     for my $fn (<$index_directory/*.sereal>) {

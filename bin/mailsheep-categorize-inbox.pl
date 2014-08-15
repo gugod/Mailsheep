@@ -12,12 +12,8 @@ use lib $FindBin::Bin . "/lib";
 
 use Mailsheep::App;
 
-my %opts;
-getopts('d:', \%opts);
-
 my $app = Mailsheep::App->new(
-    maildir => "$ENV{HOME}/Maildir/",
-    indexdir => $opts{d},
+    config_dir => "$ENV{HOME}/.config/mailsheep"
 );
 
 $app->categorize_new_messages();

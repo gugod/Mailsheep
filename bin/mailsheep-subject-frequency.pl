@@ -12,7 +12,9 @@ getopts('d:', \%opts);
 binmode STDOUT, ":utf8";
 
 my $box = shift or die;
-my $app = Mailsheep::App->new(maildir => "$ENV{HOME}/Maildir/", indexdir => $opts{d});
+my $app = Mailsheep::App->new(
+    config_dir => "$ENV{HOME}/.config/mailsheep"
+);
 
 my $ft = $app->subject_frequency($box);
 
