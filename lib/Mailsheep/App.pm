@@ -8,6 +8,7 @@ use File::Spec::Functions qw(catfile);
 use Encode qw(encode_utf8);
 use Digest::SHA1 qw(sha1_hex);
 use File::Basename qw(basename);
+use Sereal::Decoder;
 use Mail::Box::Manager;
 
 has config_dir => (is => "ro", required => 1);
