@@ -1,19 +1,14 @@
 #!/usr/bin/env perl
 use v5.14; use strict; use warnings;
+use Getopt::Std;
+use YAML;
+use Encode qw(encode_utf8);
+use Sereal::Encoder;
+
 use FindBin;
 use lib $FindBin::Bin . "/../lib";
 
 use Mailsheep::App;
-
-use Getopt::Std;
-use YAML;
-
-use Encode qw(encode_utf8);
-use Sereal::Encoder;
-
-my %opts;
-getopts('d:', \%opts);
-binmode STDOUT, ":utf8";
 
 my $app = Mailsheep::App->new(config_dir => "$ENV{HOME}/.config/mailsheep");
 
