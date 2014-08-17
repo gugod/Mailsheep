@@ -2,13 +2,10 @@ use v5.18;
 
 package Mailsheep::MessageOrganizer {
     use Moo;
-    use Email::MIME;
     use Encode qw(decode_utf8 encode_utf8);
-    use List::Util qw(max sum);
+    use List::Util qw(sum);
     use List::MoreUtils qw(uniq);
-    use JSON;
     use Mailsheep::Analyzer;
-    my $json = JSON->new;
 
     has idx => (
         is => "ro",
@@ -38,7 +35,7 @@ package Mailsheep::MessageOrganizer {
                 $pc{$category} = $idx->{$category}{df} / $total_docs;
             }
 
-            my (%matched, %score);
+            my %score;
             for $category (keys %$idx) {
                 my $score = $pc{$category};
                 for (@tokens) {

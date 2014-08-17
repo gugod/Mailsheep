@@ -10,6 +10,7 @@ use Digest::SHA1 qw(sha1_hex);
 use File::Basename qw(basename);
 use Sereal::Decoder;
 use Mail::Box::Manager;
+use JSON;
 
 has config_dir => (is => "ro", required => 1);
 has config => (is => "lazy");
@@ -104,7 +105,6 @@ sub categorize_new_messages {
         next if $message->labels()->{seen};
         
         my $doc = $self->convert_mail_message_to_hash( $message );
-        my $message_str = eval { $message->string(); };
         next if $@;
 
         if (my $category = $mo->looks_like( $doc )) {
