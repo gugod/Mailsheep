@@ -8,23 +8,10 @@ use Sereal::Encoder;
 use FindBin;
 use lib $FindBin::Bin . "/../lib";
 
+use Mail::Box::Manager;
+
 use Mailsheep::App;
+use Mailsheep::Classifier;
 
 my $app = Mailsheep::App->new(config_dir => "$ENV{HOME}/.config/mailsheep");
-
-my $index_directory = $app->config->{index_dir};
-mkdir( $index_directory ) unless -d $index_directory;
-
-my $sereal = Sereal::Encoder->new;
-
-for my $folder_name (@{ $app->config->{category} }) {
-    my $idx = $app->index_folder($folder_name);
-    $folder_name =~ s{\A(.*/)?([^/]+)\z}{$2};
-    open my $fh, ">", File::Spec->catdir($index_directory, "${folder_name}.sereal");
-    print $fh $sereal->encode($idx);
-    close($fh);
-
-    open $fh, ">", File::Spec->catdir($index_directory, "${folder_name}.yml");
-    print $fh encode_utf8(YAML::Dump($idx));
-    close($fh);
-}
+$app->train_with_old_messages;

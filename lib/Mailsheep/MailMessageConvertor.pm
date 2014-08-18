@@ -1,8 +1,9 @@
 package Mailsheep::MailMessageConvertor;
 use v5.14;
 use Moo::Role;
+use Mailsheep::Analyzer;
 
-sub convert_mail_message_to_hash {
+sub convert_mail_message_to_document {
     my (undef, $message) = @_;
     return {
         from       => join(" ", map({ $_->address } $message->from)),
@@ -11,6 +12,18 @@ sub convert_mail_message_to_hash {
         'reply-to' => ($message->head->study("reply-to") // "")."",
         'message-id'  => ($message->head->study("message-id") // "")."",
         'return-path' => ($message->head->study("return-path") // "")."",
+    };
+}
+
+sub convert_mail_message_to_analyzed_document {
+    my ($self, $message) = @_;
+    my $doc = $self->convert_mail_message_to_document($message);
+    return {
+        header => [ grep { $_ } (
+            $doc->{from},
+            $doc->{'reply-to'},
+            Mailsheep::Analyzer::standard( Mailsheep::Analyzer::filter_characters( $doc->{subject} ) ),
+        )]
     };
 }
 
