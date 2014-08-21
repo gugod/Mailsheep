@@ -68,29 +68,35 @@ sub train_with_old_messages {
 }
 
 sub categorize_new_messages {
-    my ($self) = @_;
+    my ($self, $folder_name) = @_;
 
     my $classifier = Mailsheep::Classifier->new( store => $self->config->{index_dir} );
 
     my $mgr = $self->mail_box_manager;
-    my $folder_inbox = $mgr->open("=INBOX", access => "rw") or die "INBOX does not exists\n";
+    my $folder = $mgr->open("=${folder_name}", access => "rw") or die "$folder_name does not exists\n";
 
     my %folder;
 
     for my $category (@{$self->config->{category}}) {
-        $folder{$category} = $mgr->open("=${category}",  access => "a") or die "The mail box \"${category}\" does not exist\n";
+        next if $category eq $folder_name;
+        $folder{$category} = $mgr->open("=${category}",  access => "a") or die "The mail box \"=${category}\" does not exist\n";
     }
 
-    my $count_message = $folder_inbox->messages;
+    my $count_message = $folder->messages;
     for my $i (0..$count_message-1) {
-        my $message = $folder_inbox->message($i);
+        my $message = $folder->message($i);
         next if $message->labels()->{seen};
         my $doc = $self->convert_mail_message_to_analyzed_document( $message );
+        my $mail_message_subject = $message->head->study("subject") // "";
         if (my $category = $classifier->classify($doc)) {
-            say encode_utf8( "$category\t<=\t" . ( $message->head->study("subject") // "") );
-             $mgr->moveMessage($folder{$category}, $message);
+            if ($category eq $folder_name) {
+                say encode_utf8( "$category\t==\t$mail_message_subject" );
+            } else {
+                say encode_utf8( "$category\t<=\t$mail_message_subject" );
+                $mgr->moveMessage($folder{$category}, $message);
+            }
         } else {
-            say encode_utf8( "       \t<=\t" . ( $message->head->study("subject") // "") );
+            say encode_utf8( "       \t<=\t$mail_message_subject" );
         }
     }
 }

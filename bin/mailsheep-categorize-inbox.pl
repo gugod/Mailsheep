@@ -9,4 +9,5 @@ my $app = Mailsheep::App->new(
     config_dir => "$ENV{HOME}/.config/mailsheep"
 );
 
-$app->categorize_new_messages();
+my $folder = shift || "=INBOX";
+$app->categorize_new_messages($folder);
