@@ -8,6 +8,7 @@ use File::Spec::Functions qw(catfile);
 use Encode qw(encode_utf8);
 use Mail::Box::Manager;
 use JSON;
+use Parallel::ForkManager;
 
 has config_dir => (is => "ro", required => 1);
 has config => (is => "lazy");
@@ -45,7 +46,9 @@ sub train_with_old_messages {
         store => $self->config->{index_dir}
     );
 
+    my $forkman = Parallel::ForkManager->new(4);
     for my $folder_name (@{ $self->config->{category} }) {
+        $forkman->start and next;
         say $folder_name;
         my $folder = $self->mail_box_manager->open("=${folder_name}", access => "r");
         my $count_message = $folder->messages;
@@ -59,7 +62,9 @@ sub train_with_old_messages {
         }
 
         $classifier->train($folder_name, \@documents);
+        $forkman->finish;
     }
+    $forkman->wait_all_children;
 }
 
 sub categorize_new_messages {
