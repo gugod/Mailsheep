@@ -68,11 +68,12 @@ sub categorize_new_messages {
     my $classifier = Mailsheep::Classifier->new( store => $self->config->{index_dir} );
 
     my $mgr = $self->mail_box_manager;
-    my $folder_inbox = $mgr->open("=INBOX", access => "rw");
+    my $folder_inbox = $mgr->open("=INBOX", access => "rw") or die "INBOX does not exists\n";
+
     my %folder;
 
     for my $category (@{$self->config->{category}}) {
-        $folder{$category} = $mgr->open("=${category}",  access => "a");
+        $folder{$category} = $mgr->open("=${category}",  access => "a") or die "The mail box \"${category}\" does not exist\n";
     }
 
     my $count_message = $folder_inbox->messages;
