@@ -19,9 +19,9 @@ sub convert_mail_message_to_analyzed_document {
     my ($self, $message) = @_;
     my $doc = $self->convert_mail_message_to_document($message);
     return {
-        from => [ $doc->{from} ],
-        'list-id' => [ $doc->{'list-id'} ],
-        'reply-to' => [ $doc->{'reply-to'} ],
+        from => [ $doc->{from} || () ],
+        'list-id' => [ $doc->{'list-id'} || () ],
+        'reply-to' => [ $doc->{'reply-to'} || () ],
         header => [ grep { $_ } (
             $doc->{from},
             $doc->{'reply-to'},

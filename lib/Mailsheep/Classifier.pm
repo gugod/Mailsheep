@@ -79,7 +79,8 @@ sub classify {
         next if $doc->{$field} eq '';
 
         my $category;
-        my @tokens = @{$doc->{$field}};
+        my @tokens = @{$doc->{$field}} or next;
+
         my (%pc,%p);
         my $total_docs = sum(map { $_->{df} } values %$idx);
         for $category (keys %$idx) {
