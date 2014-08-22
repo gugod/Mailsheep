@@ -12,7 +12,7 @@ getopts('na', \%opts);
 my $app = Mailsheep::App->new(
     config_dir => "$ENV{HOME}/.config/mailsheep"
 );
-my $folder = shift || "=INBOX";
+my $folder = shift || "INBOX";
 
 $opts{'dry-run'} = $opts{n};
 $opts{all} = $opts{a};
