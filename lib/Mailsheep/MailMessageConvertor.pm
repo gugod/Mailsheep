@@ -18,16 +18,14 @@ sub convert_mail_message_to_document {
 sub convert_mail_message_to_analyzed_document {
     my ($self, $message) = @_;
     my $doc = $self->convert_mail_message_to_document($message);
-    return {
-        from => [ $doc->{from} || () ],
-        'list-id' => [ $doc->{'list-id'} || () ],
+    my $doc2 = {
+        'from'     => [ $doc->{from} || () ],
+        'list-id'  => [ $doc->{'list-id'} || () ],
         'reply-to' => [ $doc->{'reply-to'} || () ],
-        header => [ grep { $_ } (
-            $doc->{from},
-            $doc->{'reply-to'},
-            Mailsheep::Analyzer::standard( Mailsheep::Analyzer::filter_characters( $doc->{subject} ) ),
-        )]
+        'subject'  => [ Mailsheep::Analyzer::standard( Mailsheep::Analyzer::filter_characters( $doc->{subject} ) ) ],
     };
+    $doc2->{header_combined} = [ map { @$_ } values %$doc2 ];
+    return $doc2;
 }
 
 1;
