@@ -114,6 +114,11 @@ sub classify {
     }
 
     my @guess = sort { $b->{maxscore} <=> $a->{maxscore} } values %guess;
-    return ($guess[0]{maxscore} == 0) ? undef : $guess[0]{category};
+
+    return {
+        score => $guess[0]{maxscore},
+        guess => \@guess,
+        category => ($guess[0]{maxscore} == 0 ? undef : $guess[0]{category}),
+    };
 }
 1;

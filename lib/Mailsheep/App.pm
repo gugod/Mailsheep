@@ -89,15 +89,17 @@ sub categorize_new_messages {
 
         my $doc = $self->convert_mail_message_to_analyzed_document( $message );
         my $mail_message_subject = $message->head->study("subject") // "";
-        if (my $category = $classifier->classify($doc)) {
+
+        my $answer = $classifier->classify($doc);
+        if (my $category = $answer->{category}) {
             if ($category eq $folder_name) {
-                # say encode_utf8( "$category\t==\t$mail_message_subject" );
+                say encode_utf8(join("\t", $category, "==", $answer->{guess}[0]{field}, $mail_message_subject));
             } else {
-                say encode_utf8( "$category\t<=\t$mail_message_subject" );
-                $mgr->moveMessage($folder{$category}, $message) unless ($options->{'dry-run'});
+                $mgr->moveMessage($folder{$category}, $message) unless $options->{'dry-run'};
+                say encode_utf8(join("\t", $category, "<=", $answer->{guess}[0]{field}, $mail_message_subject));
             }
         } else {
-            say encode_utf8( "       \t<=\t$mail_message_subject" );
+            say encode_utf8(join("\t","(????)", "<=", "(????)", $mail_message_subject));
         }
     }
 }
