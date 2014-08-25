@@ -1,4 +1,4 @@
-package Mailsheep::Classifier;
+package Mailsheep::Categorizer;
 use v5.14;
 use Moo;
 use YAML;

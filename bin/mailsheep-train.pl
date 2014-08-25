@@ -11,7 +11,7 @@ use lib $FindBin::Bin . "/../lib";
 use Mail::Box::Manager;
 
 use Mailsheep::App;
-use Mailsheep::Classifier;
+use Mailsheep::Categorizer;
 
 my $app = Mailsheep::App->new(config_dir => "$ENV{HOME}/.config/mailsheep");
 $app->train_with_old_messages;

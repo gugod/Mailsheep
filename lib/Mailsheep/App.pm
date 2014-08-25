@@ -2,7 +2,7 @@ package Mailsheep::App;
 use v5.14;
 use Moo;
 use Mailsheep::Analyzer;
-use Mailsheep::Classifier;
+use Mailsheep::Categorizer;
 
 use File::Spec::Functions qw(catfile);
 use Encode qw(encode_utf8);
@@ -42,7 +42,7 @@ sub train_with_old_messages {
     my $index_directory = $self->config->{index_dir};
     mkdir( $index_directory ) unless -d $index_directory;
 
-    my $classifier = Mailsheep::Classifier->new(
+    my $classifier = Mailsheep::Categorizer->new(
         store => $self->config->{index_dir}
     );
 
@@ -70,7 +70,7 @@ sub train_with_old_messages {
 sub categorize_new_messages {
     my ($self, $folder_name, $options) = @_;
 
-    my $classifier = Mailsheep::Classifier->new( store => $self->config->{index_dir} );
+    my $classifier = Mailsheep::Categorizer->new( store => $self->config->{index_dir} );
 
     my $mgr = $self->mail_box_manager;
     my $folder = $mgr->open("=${folder_name}", access => "rw") or die "$folder_name does not exists\n";
