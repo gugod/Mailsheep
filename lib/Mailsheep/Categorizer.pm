@@ -22,7 +22,7 @@ has idx => (
 sub _build_idx {
     my $self = shift;
     my $idx = {};
-    
+
     my $store = $self->store;
     my $sereal = Sereal::Decoder->new;
     for my $fn (<$store/*.sereal>) {
@@ -115,10 +115,19 @@ sub classify {
 
     my @guess = sort { $b->{maxscore} <=> $a->{maxscore} } values %guess;
 
-    return {
-        score => $guess[0]{maxscore},
-        guess => \@guess,
-        category => ($guess[0]{maxscore} == 0 ? undef : $guess[0]{category}),
-    };
+    if (@guess) {
+        return {
+            score => $guess[0]{maxscore},
+            guess => \@guess,
+            category => ($guess[0]{maxscore} == 0 ? undef : $guess[0]{category}),
+        };
+    } else {
+        return {
+            score => 0,
+            guess => \@guess,
+            category => undef,
+        };
+    }
 }
+
 1;
