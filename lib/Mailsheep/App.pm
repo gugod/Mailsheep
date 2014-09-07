@@ -73,7 +73,7 @@ sub categorize_new_messages {
     my $classifier = Mailsheep::Categorizer->new( store => $self->config->{index_dir} );
 
     my $mgr = $self->mail_box_manager;
-    my $folder = $mgr->open("=${folder_name}", access => "rw") or die "$folder_name does not exists\n";
+    my $folder = $mgr->open("=${folder_name}", access => "rw", remove_when_empty => 0) or die "$folder_name does not exists\n";
 
     my %folder;
 
