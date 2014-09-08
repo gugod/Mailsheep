@@ -1,7 +1,7 @@
 #!/usr/bin/env perl
 use v5.18;
 use FindBin;
-use lib $FindBin::Bin . "/lib";
+use lib "${FindBin::Bin}/../lib";
 
 use Getopt::Std;
 use Mailsheep::App;
