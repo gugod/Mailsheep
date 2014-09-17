@@ -143,4 +143,43 @@ sub purge_old_messages {
     }
 }
 
+sub date_histogram {
+    my $self = shift;
+    my $now = time;
+
+    my $interval = 7;
+
+    for my $folder_config (@{ $self->config->{folders} }) {
+        my $name = $folder_config->{name};
+        my $retention = $folder_config->{retention} or next;
+
+        my $folder = $self->mail_box_manager->open("=${name}", access => "r");
+        my $count_message = $folder->messages;
+
+        my $earliest_timestamp = time;
+        my %bucket;
+        my @documents;
+        for my $i (0..$count_message-1) {
+            my $message = $folder->message($i);
+            my $delta_days = int(($now - $message->timestamp())/86400);
+            my $delta_interval = int($delta_days / $interval);
+            $bucket{$delta_interval}++;
+
+            $earliest_timestamp = $message->timestamp() if $message->timestamp() < $earliest_timestamp;
+        }
+        $folder->close;
+
+        my @v;
+        my $t = $now;
+        while($t >= $earliest_timestamp) {
+            my $k = int($t/$interval);
+            push @v, [$k, $bucket{$k} //0];
+            $t -= $interval*86400;
+        }
+
+        use Data::Dumper;
+        print Data::Dumper::Dumper([$name, \%bucket]);
+    }
+}
+
 1;
