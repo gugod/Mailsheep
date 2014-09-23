@@ -85,7 +85,11 @@ sub classify {
         my $total_docs = sum(map { $_->{df} } values %$idx);
         for $category (keys %$idx) {
             for my $token (@tokens) {
-                $p{$token}{$category} = ($idx->{$category}{field}{$field}{token}{$token}{tf} ||0) / $idx->{$category}{field}{$field}{tf};
+                if ($idx->{$category}{field}{$field}{tf} > 0) {
+                    $p{$token}{$category} = ($idx->{$category}{field}{$field}{token}{$token}{tf} ||0) / $idx->{$category}{field}{$field}{tf};
+                } else {
+                    $p{$token}{$category} = 0;
+                }
             }
             $pc{$category} = $idx->{$category}{df} / $total_docs;
         }
