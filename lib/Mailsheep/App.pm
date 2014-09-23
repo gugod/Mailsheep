@@ -47,8 +47,9 @@ sub train_with_old_messages {
     );
 
     my $forkman = Parallel::ForkManager->new(4);
-    for my $folder_name (@{ $self->config->{category} }) {
+    for my $folder (@{ $self->config->{folders} }) {
         $forkman->start and next;
+        my $folder_name = $folder->{name};
         say $folder_name;
         my $folder = $self->mail_box_manager->open("=${folder_name}", access => "r");
         my $count_message = $folder->messages;
@@ -77,7 +78,8 @@ sub categorize_new_messages {
 
     my %folder;
 
-    for my $category (@{$self->config->{category}}) {
+    for my $folder (@{$self->config->{folders}}) {
+        my $category = $folder->{name};
         next if $category eq $folder_name;
         $folder{$category} = $mgr->open("=${category}",  access => "a") or die "The mail box \"=${category}\" does not exist\n";
     }
