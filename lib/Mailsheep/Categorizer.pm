@@ -72,7 +72,11 @@ sub train {
 sub classify {
     my ($self, $doc) = @_;
 
-    my $idx = $self->idx;
+    my $idx = {%{$self->idx}};
+    for (keys %$idx) {
+        delete $idx->{$_} unless keys %{ $idx->{$_} };
+    }
+    my $total_docs = sum(map { $_->{df} } values %$idx);
 
     my %guess;
     for my $field (keys %$doc) {
@@ -82,7 +86,6 @@ sub classify {
         my @tokens = @{$doc->{$field}} or next;
 
         my (%pc,%p);
-        my $total_docs = sum(map { $_->{df} } values %$idx);
         for $category (keys %$idx) {
             for my $token (@tokens) {
                 if ($idx->{$category}{field}{$field}{tf} > 0) {
