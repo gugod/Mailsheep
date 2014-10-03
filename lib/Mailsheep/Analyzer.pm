@@ -1,5 +1,5 @@
 package Mailsheep::Analyzer;
-use v5.14;
+use v5.12;
 use strict;
 use Unicode::UCD qw(charscript);
 

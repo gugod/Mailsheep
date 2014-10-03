@@ -1,5 +1,5 @@
 package Mailsheep::MailMessageConvertor;
-use v5.14;
+use v5.12;
 use Moo::Role;
 use Mailsheep::Analyzer;
 

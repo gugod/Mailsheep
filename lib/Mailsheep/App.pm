@@ -1,5 +1,5 @@
 package Mailsheep::App;
-use v5.14;
+use v5.12;
 use Moo;
 use Mailsheep::Analyzer;
 use Mailsheep::Categorizer;
