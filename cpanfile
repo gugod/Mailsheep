@@ -1,5 +1,4 @@
 requires 'Digest::SHA1'          => '2.13';
-requires 'Email::MIME'           => '1.926';
 requires 'JSON'                  => '2.90';
 requires 'List::MoreUtils'       => '0.33';
 requires 'Mail::Box::Manager'    => '2.115';
