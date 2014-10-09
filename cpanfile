@@ -7,3 +7,4 @@ requires 'Parallel::ForkManager' => '0';
 requires 'Sereal::Decoder'       => '3.001';
 requires 'Sereal::Encoder'       => '3.001';
 requires 'YAML'                  => '0';
+requires 'File::XDG'             => '0.04';

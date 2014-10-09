@@ -11,7 +11,10 @@ use JSON;
 use Parallel::ForkManager;
 
 has config_dir => (is => "ro", required => 1);
-has config => (is => "lazy");
+has data_dir   => (is => "ro", required => 0);
+has cache_dir  => (is => "ro", required => 0);
+
+has config     => (is => "lazy");
 
 has mail_box_manager => ( is => "lazy" );
 
