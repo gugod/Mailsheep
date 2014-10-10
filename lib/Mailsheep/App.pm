@@ -63,27 +63,6 @@ sub subject_frequency {
     return \%seen;
 }
 
-sub purge_old_messages {
-    my $self = shift;
-    my $now = time;
-    for my $folder_config (@{ $self->config->{folders} }) {
-        my $name = $folder_config->{name};
-        my $retention = $folder_config->{retention} or next;
-
-        my $folder = $self->mail_box_manager->open("=${name}", access => "rw", remove_when_empty => 0);
-        my $count_message = $folder->messages;
-
-        my @documents;
-        for my $i (0..$count_message-1) {
-            my $message = $folder->message($i);
-            my $delta_days = int(($now - $message->timestamp())/86400);
-            if ($delta_days > $retention) {
-                $message->delete;
-            }
-        }
-        $folder->close;
-    }
-}
 
 sub date_histogram {
     my $self = shift;
