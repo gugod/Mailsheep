@@ -1,42 +1,17 @@
 package Mailsheep::App;
 use v5.12;
 use Moo;
+use MooX::Options;
+
 use Mailsheep::Analyzer;
 use Mailsheep::Categorizer;
 
+use File::XDG;
 use File::Spec::Functions qw(catfile);
 use Encode qw(encode_utf8);
 use Mail::Box::Manager;
 use JSON;
 use Parallel::ForkManager;
-
-has config_dir => (is => "ro", required => 1);
-has data_dir   => (is => "ro", required => 0);
-has cache_dir  => (is => "ro", required => 0);
-
-has config     => (is => "lazy");
-
-has mail_box_manager => ( is => "lazy" );
-
-sub _build_mail_box_manager {
-    my $self = shift;
-    return Mail::Box::Manager->new( folderdir => $self->config->{maildir} ),
-}
-
-sub _build_config {
-    my $self = shift;
-    my $config_file = catfile($self->config_dir, "config.json");
-    unless (-f $config_file) {
-        die "config file $config_file does not exist.";        
-    }
-
-    open(my $fh, "<", $config_file) or die $!;
-    local $/ = undef;
-    my $config_text = <$fh>;
-    close($fh);
-    my $json = JSON->new;
-    return $json->decode($config_text);
-}
 
 with 'Mailsheep::MailMessageConvertor';
 
@@ -69,44 +44,6 @@ sub train_with_old_messages {
         $forkman->finish;
     }
     $forkman->wait_all_children;
-}
-
-sub categorize_new_messages {
-    my ($self, $folder_name, $options) = @_;
-
-    my $classifier = Mailsheep::Categorizer->new( store => $self->config->{index_dir} );
-
-    my $mgr = $self->mail_box_manager;
-    my $folder = $mgr->open("=${folder_name}", access => "rw", remove_when_empty => 0) or die "$folder_name does not exists\n";
-
-    my %folder;
-
-    for my $folder (@{$self->config->{folders}}) {
-        my $category = $folder->{name};
-        next if $category eq $folder_name;
-        $folder{$category} = $mgr->open("=${category}",  access => "a") or die "The mail box \"=${category}\" does not exist\n";
-    }
-
-    my $count_message = $folder->messages;
-    for my $i (0..$count_message-1) {
-        my $message = $folder->message($i);
-        next if !$options->{all} && $message->labels()->{seen};
-
-        my $doc = $self->convert_mail_message_to_analyzed_document( $message );
-        my $mail_message_subject = $message->head->study("subject") // "";
-
-        my $answer = $classifier->classify($doc);
-        if (my $category = $answer->{category}) {
-            if ($category eq $folder_name) {
-                say encode_utf8(join("\t", $category, "==", $answer->{guess}[0]{field}, $mail_message_subject));
-            } else {
-                $mgr->moveMessage($folder{$category}, $message) unless $options->{'dry-run'};
-                say encode_utf8(join("\t", $category, "<=", $answer->{guess}[0]{field}, $mail_message_subject));
-            }
-        } else {
-            say encode_utf8(join("\t","(????)", "<=", "(????)", $mail_message_subject));
-        }
-    }
 }
 
 sub subject_frequency {

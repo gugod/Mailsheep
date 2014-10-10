@@ -1,19 +1,36 @@
 #!/usr/bin/env perl
-use v5.18;
+use v5.12;
+use strict;
 use FindBin;
 use lib "${FindBin::Bin}/../lib";
 
-use File::XDG;
+sub camelcase {
+    my $n = lc($_[0]);
+    $n =~ s/(\A|[\-_])(\w)/uc($2)/eg;
+    return $n;
+}
 
-use Getopt::Std;
-use Mailsheep::App;
+my $command = "help";
 
-my $xdg = File::XDG->new( name => "mailsheep" );
+if (@ARGV > 0) {
+    $command = shift(@ARGV);
+}
 
-my $app = Mailsheep::App->new(
-    config_dir => $xdg->config_home,
-    cache_dir  => $xdg->cache_home,
-    data_dir   => $xdg->data_home,
-    args       => \@ARGV,
-);
-$app->run();
+my $cmd_class = "Mailsheep::Cmd::" . ( camelcase($command) );
+eval "require $cmd_class;" or do {
+    die "Unknown command: $command\n";
+};
+
+my @param;
+for (@ARGV) {
+    if (/\A--(?<optname>.+)\z/) {
+        my $n = lc($+{optname});
+        $n =~ s{-}{_}g;
+        push @param, $n;
+    } else {
+        push @param, $_;
+    }
+}
+
+$cmd_class->new(@param)->execute();
+
