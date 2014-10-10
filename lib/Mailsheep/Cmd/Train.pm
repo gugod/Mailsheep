@@ -1,21 +1,15 @@
-package Mailsheep::App;
+package Mailsheep::Cmd::Train;
 use v5.12;
-use Moo;
-use MooX::Options;
 
-use Mailsheep::Analyzer;
+use Moo; with(
+    'Mailsheep::Role::Cmd',
+    'Mailsheep::MailMessageConvertor'
+);
+
+use Parallel::ForkManager;
 use Mailsheep::Categorizer;
 
-use File::XDG;
-use File::Spec::Functions qw(catfile);
-use Encode qw(encode_utf8);
-use Mail::Box::Manager;
-use JSON;
-use Parallel::ForkManager;
-
-with 'Mailsheep::MailMessageConvertor';
-
-sub train_with_old_messages {
+sub execute {
     my ($self) = @_;
     my $index_directory = $self->config->{index_dir};
     mkdir( $index_directory ) unless -d $index_directory;
