@@ -8,11 +8,14 @@ use Moo; with(
 
 use Encode 'encode_utf8';
 use Mailsheep::Categorizer;
-
+use JSON;
+my $JSON = JSON->new->pretty->canonical;
 
 has folder => (is => "ro", default => sub { "INBOX" });
 
 has dry_run => ( is => "ro", default => 0 );
+has all_message => ( is => "ro", default => 0 );
+has explain  => ( is => "ro", default => 0 );
 
 sub execute {
     my ($self) = @_;
@@ -35,6 +38,7 @@ sub execute {
     my $count_message = $folder->messages;
     for my $i (0..$count_message-1) {
         my $message = $folder->message($i);
+        next if $message->labels()->{seen} && !($self->all_message);
 
         my $doc = $self->convert_mail_message_to_analyzed_document( $message );
         my $mail_message_subject = $message->head->study("subject") // "";
@@ -49,6 +53,9 @@ sub execute {
             }
         } else {
             say encode_utf8(join("\t","(????)", "<=", "(????)", $mail_message_subject));
+        }
+        if ($self->explain) {
+            say encode_utf8("\t" .$JSON->encode( $answer ) );
         }
     }
 }

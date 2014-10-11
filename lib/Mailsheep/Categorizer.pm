@@ -117,6 +117,8 @@ sub classify {
             categories => \@c,
             score => \%score,
             tokens => \@tokens,
+            token_p => \%p,
+            categories_p => \%pc,
         };
     }
 
