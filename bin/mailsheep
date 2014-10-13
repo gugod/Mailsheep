@@ -16,6 +16,8 @@ if (@ARGV > 0) {
     $command = shift(@ARGV);
 }
 
+binmode STDOUT, ":utf8";
+
 my $cmd_class = "Mailsheep::Cmd::" . ( camelcase($command) );
 eval "require $cmd_class;" or do {
     die "Unknown command: $command\n";
