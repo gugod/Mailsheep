@@ -20,7 +20,7 @@ binmode STDOUT, ":utf8";
 
 my $cmd_class = "Mailsheep::Cmd::" . ( camelcase($command) );
 eval "require $cmd_class;" or do {
-    die "Unknown command: $command\n";
+    die "Unknown command: $command\n (cmd_class = $cmd_class)\n";
 };
 
 my @param;
