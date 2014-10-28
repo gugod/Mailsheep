@@ -20,3 +20,16 @@ The implementation is Naive Bayes
     mailsheep-purge-old.pl
 
 ## Mail stats
+
+## Config Example
+
+{
+    "maildir": "/home/gugod/Maildir",
+    "index_dir": "/home/gugod/.config/mailsheep/index",
+    "folders": [
+        { "name": "Archive",       "retention": 0   },
+        { "name": "Boring",        "retention": 60  },
+        { "name": "DevPerl5",      "retention": 60  },
+        { "name": "Junk",          "retention": 120 }
+    ]
+}
