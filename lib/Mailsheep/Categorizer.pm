@@ -79,13 +79,18 @@ sub classify {
     my $total_docs = sum(map { $_->{df} } values %$idx);
 
     my %guess;
+    my %category_p;
+    for my $category (keys %$idx) {
+        $category_p{$category} = $idx->{$category}{df} / $total_docs;
+    }
+
     for my $field (keys %$doc) {
         next if $doc->{$field} eq '';
 
         my $category;
         my @tokens = @{$doc->{$field}} or next;
 
-        my (%pc,%p);
+        my %p;
         for $category (keys %$idx) {
             for my $token (@tokens) {
                 if ($idx->{$category}{field}{$field}{tf} > 0) {
@@ -94,12 +99,11 @@ sub classify {
                     $p{$token}{$category} = 0;
                 }
             }
-            $pc{$category} = $idx->{$category}{df} / $total_docs;
         }
 
         my %score;
         for $category (keys %$idx) {
-            my $score = $pc{$category};
+            my $score = $category_p{$category};
             for (@tokens) {
                 $score *= $p{$_}{$category};
             }
@@ -114,11 +118,9 @@ sub classify {
             fieldLength => 0+@tokens,
             category   => $c[0],
             confidence => $score{$c[0]} / (sum(values %score) ||1),
-            categories => \@c,
             score => \%score,
             tokens => \@tokens,
             token_p => \%p,
-            categories_p => \%pc,
         };
     }
 
@@ -129,12 +131,14 @@ sub classify {
             score => $guess[0]{maxscore},
             guess => \@guess,
             category => ($guess[0]{maxscore} == 0 ? undef : $guess[0]{category}),
+            category_p => \%category_p
         };
     } else {
         return {
             score => 0,
             guess => \@guess,
             category => undef,
+            category_p => \%category_p
         };
     }
 }
