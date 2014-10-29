@@ -6,7 +6,6 @@ use Moo; with(
     'Mailsheep::MailMessageConvertor'
 );
 
-use Encode 'encode_utf8';
 use Mailsheep::Categorizer;
 use JSON;
 my $JSON = JSON->new->pretty->canonical;
@@ -46,16 +45,16 @@ sub execute {
         my $answer = $classifier->classify($doc);
         if (my $category = $answer->{category}) {
             if ($category eq $folder_name) {
-                say encode_utf8(join("\t", $category, "==", $answer->{guess}[0]{field}, $mail_message_subject));
+                say(join("\t", $category, "==", $answer->{guess}[0]{field}, $mail_message_subject));
             } else {
                 $mgr->moveMessage($folder{$category}, $message) unless $self->dry_run;
-                say encode_utf8(join("\t", $category, "<=", $answer->{guess}[0]{field}, $mail_message_subject));
+                say(join("\t", $category, "<=", $answer->{guess}[0]{field}, $mail_message_subject));
             }
         } else {
-            say encode_utf8(join("\t","(????)", "<=", "(????)", $mail_message_subject));
+            say(join("\t","(????)", "<=", "(????)", $mail_message_subject));
         }
         if ($self->explain) {
-            say encode_utf8("\t" .$JSON->encode( $answer ) );
+            say("\t" .$JSON->encode( $answer ) );
         }
     }
 }
