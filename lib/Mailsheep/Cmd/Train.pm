@@ -29,7 +29,7 @@ sub execute {
         my @documents;
         for my $i (0..$count_message-1) {
             my $message = $folder->message($i);
-            next unless $message->labels()->{seen};
+            next unless $message->label("seen");
             my $doc = $self->convert_mail_message_to_analyzed_document( $message );
             push @documents, $doc;
         }
