@@ -19,6 +19,7 @@ sub execute {
         my @documents;
         for my $i (0..$count_message-1) {
             my $message = $folder->message($i);
+            next unless $message->label("seen");
             my $delta_days = int(($now - $message->timestamp())/86400);
             if ($delta_days > $retention) {
                 say "DELETE: " . $folder->name . " " . $message->subject;
