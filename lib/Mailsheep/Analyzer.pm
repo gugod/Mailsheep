@@ -53,14 +53,14 @@ sub standard {
     map { /\p{Ideographic}/ ? (split "") : $_ } by_script($str);
 }
 
-sub ngram($) {
+sub ngram {
+    my ($s, $gram_length) = @_;
+    $gram_length ||= 1;
+
     my @t;
-    my $s = $_[0];
     my $l = length($s);
-    while($l > 1) {
-        for (2..$l-1) {
-            push @t, substr($s, 0, $_);
-        }
+    while($l > $gram_length) {
+        push @t, substr($s, 0, $gram_length);
         $s = substr($s, 1);
         $l = length($s);
     }
@@ -74,22 +74,6 @@ sub shingle($@) {
         push @x, join " ", @t[$_ .. $_+$size-1];
     }
     return @x;
-}
-
-sub by_script_than_ngram($) {
-    my @token = by_script(lc($_[0]));
-    return @token, map { ngram( $_ ) } @token ;
-}
-
-sub by_script_with_ngram_and_shingle($) {
-    my $str = lc($_[0]);
-    my @token = by_script($str);
-    my @shingle;
-    for (0..$#token-1) {
-        push @shingle, $token[$_] . " " . $token[$_+1];
-    }
-
-    return @shingle, @token, map { ngram($_) } @token;
 }
 
 sub standard_than_shingle2 {
