@@ -76,6 +76,15 @@ sub shingle($@) {
     return @x;
 }
 
+sub nskip_shingle {
+    my ($skip, $tokens) = @_;
+    my @x;
+    for (0..($#$tokens-$skip-1)) {
+        push @x, join " ", @{$tokens}[$_, ($_+$skip+1)];
+    }
+    return \@x;
+}
+
 sub standard_than_shingle2 {
     my @tokens = standard($_[0]);
     my @shingles = shingle(2, @tokens);
