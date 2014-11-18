@@ -1,6 +1,7 @@
 requires 'Digest::SHA1'          => '2.13';
 requires 'JSON'                  => '2.90';
 requires 'List::MoreUtils'       => '0.33';
+requires 'List::Gen'             => '0.974';
 requires 'Mail::Box::Manager'    => '2.115';
 requires 'Moo'                   => '1.005000';
 requires 'Parallel::ForkManager' => '0';

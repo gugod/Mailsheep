@@ -93,7 +93,7 @@ sub classify {
         my %p;
         for $category (keys %$idx) {
             for my $token (@tokens) {
-                if ($idx->{$category}{field}{$field}{tf} > 0) {
+                if ( ($idx->{$category}{field}{$field}{tf} ||0) > 0) {
                     $p{$token}{$category} = ($idx->{$category}{field}{$field}{token}{$token}{tf} ||0) / $idx->{$category}{field}{$field}{tf};
                 } else {
                     $p{$token}{$category} = 0;
