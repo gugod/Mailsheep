@@ -22,8 +22,7 @@ sub convert_mail_message_to_analyzed_document {
         'from'     => [ $doc->{from} || () ],
         'list-id'  => [ $doc->{'list-id'} || () ],
         'reply-to' => [ $doc->{'reply-to'} || () ],
-        'return-path' => [ $doc->{'return-path'} || () ],
-        'subject'  => [ Mailsheep::Analyzer::standard( Mailsheep::Analyzer::filter_characters( $doc->{subject} ) ) ],
+        'return-path' => [ $doc->{'return-path'} || () ]
     };
     $doc2->{header_combined} = [ map { @$_ } values %$doc2 ];
     return $doc2;
