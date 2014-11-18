@@ -5,7 +5,7 @@ use Unicode::UCD qw(charscript);
 
 sub filter_characters {
     local $_ = $_[0];
-    s/\P{Letter}/ /g;
+    s/\b/ /g;
     s/\A\s+//g;
     s/\s+\z//g;
     s/\s+/ /g;
