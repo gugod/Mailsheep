@@ -104,5 +104,18 @@ sub standard_shingle2_shingle3 {
     return (@tokens, @shingle2, @shingle3);
 }
 
+sub standard_with_multi_shingle {
+    my $str = shift;
+    my @tokens = standard($str);
+    my @extra;
+    for (2 .. @tokens) {
+        push @extra, shingle($_, @tokens);
+    }
+    for (1 .. $#tokens) {
+        push @extra, @{nskip_shingle($_, \@tokens)};
+    }
+    return [ @tokens, @extra ]
+}
+
 
 1;
