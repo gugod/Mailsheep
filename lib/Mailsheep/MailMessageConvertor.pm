@@ -9,11 +9,11 @@ sub convert_mail_message_to_document {
     return {
         sender     => [ map { $_->address ||"" } $message->sender ],
         from       => [ map { $_->address ||"" } $message->from   ],
-        to         => [ map { $_->address ||"" } $message->to     ],
         'list-id'  => [($message->head->study("List-Id")  // "").""],
         'reply-to' => [($message->head->study("reply-to") // "").""],
         'message-id'  => [($message->head->study("message-id") // "").""],
         'return-path' => [($message->head->study("return-path") // "").""],
+        # to         => [ map { $_->address ||"" } $message->to     ],
         # subject    => ($message->head->study("subject")  // "")."",
     };
 }
