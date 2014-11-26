@@ -10,31 +10,41 @@ sub convert_mail_message_to_document {
         sender     => [ map { $_->address ||"" } $message->sender ],
         from       => [ map { $_->address ||"" } $message->from   ],
         to         => [ map { $_->address ||"" } $message->to     ],
+        'list-id'  => [($message->head->study("List-Id")  // "").""],
+        'reply-to' => [($message->head->study("reply-to") // "").""],
+        'message-id'  => [($message->head->study("message-id") // "").""],
+        'return-path' => [($message->head->study("return-path") // "").""],
         # subject    => ($message->head->study("subject")  // "")."",
-        'list-id'  => ($message->head->study("List-Id")  // "")."",
-        'reply-to' => ($message->head->study("reply-to") // "")."",
-        'message-id'  => ($message->head->study("message-id") // "")."",
-        'return-path' => ($message->head->study("return-path") // "")."",
     };
 }
 
 sub convert_mail_message_to_analyzed_document {
     my ($self, $message) = @_;
     my $doc = $self->convert_mail_message_to_document($message);
-    my $doc2 = {
-        'sender'   => $doc->{sender},
-        'from'     => $doc->{from},
-        # 'to'       => $doc->{to},
-        (@{$doc->{to}} && @{$doc->{sender}}) ? (
-            'sender,to'  => [@{ scalar cartesian { $_[0] . " " . $_[1] } ($doc->{sender}, $doc->{to}) }],
-        ):(),
-        (@{$doc->{to}} && @{$doc->{from}}) ? (
-            'from,to'  => [@{ scalar cartesian { $_[0] . " " . $_[1] } ($doc->{from}, $doc->{to}) }],
-        ):(),
-        'list-id'  => [ $doc->{'list-id'} || () ],
-        'reply-to' => [ $doc->{'reply-to'} || () ],
-        'return-path' => [ $doc->{'return-path'} || () ]
-    };
+    s/\A.+(\@[^@]+)\z/$1/ for @{$doc->{'return-path'}};
+    s/\A.+(\@[^@]+)\z/$1/ for @{$doc->{'message-id'}};
+    for my $h (keys %$doc) {
+        for (@{$doc->{$h}}) {
+            s/\s+/ /g;
+            s/\A\s//;
+            s/\s\z//;            
+        }
+        @{$doc->{$h}} = grep { $_ ne '' } @{$doc->{$h}};
+        if (@{$doc->{$h}} == 0) {
+            delete $doc->{$h};
+        }
+    }
+
+    my @headers = keys %$doc;
+    my $doc2 = {%$doc};
+    for my $fields (@{scalar cartesian { [$_[0], $_[1]] } (\@headers, \@headers)}) {
+        next if $fields->[0] eq $fields->[1];
+        if ( @{$doc->{$fields->[0]}} && @{$doc->{$fields->[1]}} ) {
+            my $h = $fields->[0] . "," . $fields->[1];
+            $doc2->{$h} //= [@{ scalar cartesian { $_[0] . " " . $_[1] } ($doc->{$fields->[0]}, $doc->{$fields->[1]}) }];
+        }
+    }
+    
     # $doc2->{header_combined} = [ map { @$_ } values %$doc2 ];
     return $doc2;
 }
