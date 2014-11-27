@@ -42,6 +42,8 @@ sub train {
     for my $document (@$documents) {
         $idx->{df}++;
         for my $field (keys %$document) {
+            next unless defined $document->{$field};
+
             my $fidx = $idx->{field}{$field} ||= {};
             my @tokens = @{$document->{$field}};
             $fidx->{tf} += @tokens;
@@ -85,7 +87,7 @@ sub classify {
     }
 
     for my $field (keys %$doc) {
-        next if $doc->{$field} eq '';
+        next if !defined($doc->{$field}) || $doc->{$field} eq '';
 
         my $category;
         my @tokens = @{$doc->{$field}} or next;

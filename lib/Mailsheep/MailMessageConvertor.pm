@@ -11,9 +11,10 @@ sub convert_mail_message_to_document {
         from       => [ map { $_->address ||"" } $message->from   ],
         'list-id'  => [($message->head->study("List-Id")  // "").""],
         'reply-to' => [($message->head->study("reply-to") // "").""],
-        'message-id'  => [($message->head->study("message-id") // "").""],
-        'return-path' => [($message->head->study("return-path") // "").""],
-        # to         => [ map { $_->address ||"" } $message->to     ],
+        to         => [ map { $_->address ||"" } $message->to     ],
+
+        # 'return-path' => [($message->head->study("return-path") // "").""],
+        # 'message-id'  => [($message->head->study("message-id") // "").""],
         # subject    => ($message->head->study("subject")  // "")."",
     };
 }
@@ -21,8 +22,8 @@ sub convert_mail_message_to_document {
 sub convert_mail_message_to_analyzed_document {
     my ($self, $message) = @_;
     my $doc = $self->convert_mail_message_to_document($message);
-    s/\A.+(\@[^@]+)\z/$1/ for @{$doc->{'return-path'}};
-    s/\A.+(\@[^@]+)\z/$1/ for @{$doc->{'message-id'}};
+    # s/\A.+(\@[^@]+)\z/$1/ for @{$doc->{'return-path'}};
+    # s/\A.+(\@[^@]+)\z/$1/ for @{$doc->{'message-id'}};
     for my $h (keys %$doc) {
         for (@{$doc->{$h}}) {
             s/\s+/ /g;
@@ -36,7 +37,11 @@ sub convert_mail_message_to_analyzed_document {
     }
 
     my @headers = keys %$doc;
-    my $doc2 = {%$doc};
+    my $doc2 = {};
+    $doc2->{from} = $doc->{from};
+    $doc2->{sender} = $doc->{sender};
+
+    # my $doc2 = {%$doc};
     for my $fields (@{scalar cartesian { [$_[0], $_[1]] } (\@headers, \@headers)}) {
         next if $fields->[0] eq $fields->[1];
         if ( @{$doc->{$fields->[0]}} && @{$doc->{$fields->[1]}} ) {
@@ -44,8 +49,6 @@ sub convert_mail_message_to_analyzed_document {
             $doc2->{$h} //= [@{ scalar cartesian { $_[0] . " " . $_[1] } ($doc->{$fields->[0]}, $doc->{$fields->[1]}) }];
         }
     }
-    
-    # $doc2->{header_combined} = [ map { @$_ } values %$doc2 ];
     return $doc2;
 }
 
