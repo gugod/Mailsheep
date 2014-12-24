@@ -1,6 +1,13 @@
 #!/usr/bin/env perl
 use v5.12;
 use strict;
+
+local $SIG{__WARN__} = sub {
+    my $warn_text = shift;
+    return if $warn_text =~ /\A(given|when) is experimental/;
+    warn($warn_text);
+};
+
 use FindBin;
 use lib "${FindBin::Bin}/../lib";
 
