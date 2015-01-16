@@ -9,6 +9,7 @@ sub convert_mail_message_to_document {
     return {
         sender     => [ map { $_->address ||"" } $message->sender ],
         from       => [ map { $_->address ||"" } $message->from   ],
+        from_name  => [ map { $_->name    ||"" } $message->from   ],
         'list-id'  => [($message->head->study("List-Id")  // "").""],
         'reply-to' => [($message->head->study("reply-to") // "").""],
         to         => [ map { $_->address ||"" } $message->to     ],
@@ -39,6 +40,7 @@ sub convert_mail_message_to_analyzed_document {
     my @headers = keys %$doc;
     my $doc2 = {};
     $doc2->{from} = $doc->{from};
+    $doc2->{from_name} = $doc->{from_name};
     $doc2->{sender} = $doc->{sender};
 
     # my $doc2 = {%$doc};
