@@ -16,7 +16,7 @@ sub convert_mail_message_to_document {
 
         # 'return-path' => [($message->head->study("return-path") // "").""],
         # 'message-id'  => [($message->head->study("message-id") // "").""],
-        # subject    => ($message->head->study("subject")  // "")."",
+        subject    => [ ($message->head->study("subject")  // "")."" ],
     };
 }
 
@@ -42,6 +42,7 @@ sub convert_mail_message_to_analyzed_document {
     $doc2->{from} = $doc->{from};
     $doc2->{from_name} = $doc->{from_name};
     $doc2->{sender} = $doc->{sender};
+    $doc2->{subject} = $doc->{subject};
 
     # my $doc2 = {%$doc};
     for my $fields (@{scalar cartesian { [$_[0], $_[1]] } (\@headers, \@headers)}) {
@@ -51,6 +52,8 @@ sub convert_mail_message_to_analyzed_document {
             $doc2->{$h} //= [@{ scalar cartesian { $_[0] . " " . $_[1] } ($doc->{$fields->[0]}, $doc->{$fields->[1]}) }];
         }
     }
+
+    delete @{$doc2}{@headers};
     return $doc2;
 }
 
