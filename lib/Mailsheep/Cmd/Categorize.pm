@@ -48,7 +48,7 @@ sub execute {
                 say(join("\t", $category, "==", $answer->{guess}[0]{field}, $mail_message_subject));
             } else {
                 $mgr->moveMessage($folder{$category}, $message) unless $self->dry_run;
-                say(join("\t", $category, "<=", $answer->{guess}[0]{field}, $mail_message_subject));
+                say(join("\t", $category, "<=", $answer->{guess}[0]{field}, join(";", @{$doc->{$answer->{guess}[0]{field}}}), $mail_message_subject));
             }
         } else {
             say(join("\t","(????)", "<=", "(????)", $mail_message_subject));
