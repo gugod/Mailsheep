@@ -55,8 +55,9 @@ sub convert_mail_message_to_analyzed_document {
             $doc2->{$h} //= [@{ scalar cartesian { $_[0] . " " . $_[1] } ($doc->{$fields->[0]}, $doc->{$fields->[1]}) }];
         }
     }
-
     delete @{$doc2}{@headers};
+    $doc2->{'list-id'} = $doc->{'list-id'};
+    $doc2->{'fromish'} = $doc->{'fromish'};
     return $doc2;
 }
 
