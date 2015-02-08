@@ -9,7 +9,6 @@ sub convert_mail_message_to_analyzed_document {
     my ($self, $message) = @_;
     my $doc = {
         # sender     => [ map { $_->address ||"" } $message->sender ],
-        # 'list-id'  => [($message->head->study("List-Id")  // "").""],
         fromish => [
             uniq grep { $_ } map { $_ ? split(/[ \(\)\[\]]/, $_) : () } (
                 (map { ($_->address ||"",  $_->name||"" ) } $message->from),
@@ -32,8 +31,6 @@ sub convert_mail_message_to_analyzed_document {
 
     $doc->{"received.from"} = [ uniq grep { $_ } map { $_ ? split(/[ \(\)\[\]]/, $_) : () } map { $_->{from} } @received ];
 
-    # s/\A.+(\@[^@]+)\z/$1/ for @{$doc->{'return-path'}};
-    # s/\A.+(\@[^@]+)\z/$1/ for @{$doc->{'message-id'}};
     for my $h (keys %$doc) {
         for (@{$doc->{$h}}) {
             s/\s+/ /g;
@@ -56,8 +53,6 @@ sub convert_mail_message_to_analyzed_document {
         }
     }
     delete @{$doc2}{@headers};
-    $doc2->{'list-id'} = $doc->{'list-id'};
-    $doc2->{'fromish'} = $doc->{'fromish'};
     return $doc2;
 }
 
