@@ -1,6 +1,7 @@
 package Mailsheep::Analyzer;
 use v5.12;
 use strict;
+use List::MoreUtils qw(uniq);
 use Unicode::UCD qw(charscript);
 
 sub filter_characters {
@@ -72,6 +73,15 @@ sub shingle($@) {
     my @x;
     for (0..$#t-$size) {
         push @x, join " ", @t[$_ .. $_+$size-1];
+    }
+    return @x;
+}
+
+sub sorted_shingle($@) {
+    my ($size, @t) = @_;
+    my @x;
+    for (0..$#t-$size) {
+        push @x, join " ", uniq(sort @t[$_ .. $_+$size-1]);
     }
     return @x;
 }
