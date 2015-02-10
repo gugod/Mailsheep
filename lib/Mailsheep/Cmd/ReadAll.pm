@@ -19,6 +19,7 @@ sub execute {
         my $message = $folder->message($i);
         next if $message->label('seen');
         $message->label(seen => 1);
+        say "auto-READ: " . $message->head->study("subject");
     }
     $folder->close;
 }
