@@ -16,11 +16,10 @@ sub execute {
     my $folder = $self->mail_box_manager->open("=${folder_name}", access => "rw", remove_when_empty => 0) or die "$folder_name does not exists\n";
     my $count_message = $folder->messages('ALL');
     for my $i (0..$count_message-1) {
-        say "$i";
         my $message = $folder->message($i);
         next if $message->label('seen');
         $message->label(seen => 1);
-        say "auto-READ: " . $message->head->study("subject");
+        say "autoread: " . $message->head->study("subject");
     }
     $folder->close;
 }
