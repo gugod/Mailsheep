@@ -43,17 +43,6 @@ sub convert_mail_message_to_analyzed_document {
 
     $doc->{"received.from"} = [ uniq grep { $_ } map { $_ ? split(/[ \(\)\[\]]/, $_) : () } map { $_->{from} } @received ];
 
-    $doc->{"delivered-to eq to.address"} = [ "false" ];
-    for my $d0 (@{ $doc->{"delivered-to"} }) {
-        for my $d1 (@{ $doc->{"to.address"} }) {
-            if ($d0 eq $d1) {
-                $doc->{"delivered-to eq to.address"} = [ "true" ];
-                last;
-            }
-        }
-        last if ($doc->{"delivered-to eq to.address"}[0] eq "true");
-    }
-
     for my $h (keys %$doc) {
         for (@{$doc->{$h}}) {
             s/\s+/ /g;
