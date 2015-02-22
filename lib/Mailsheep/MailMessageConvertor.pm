@@ -8,12 +8,9 @@ use List::MoreUtils 'uniq';
 sub convert_mail_message_to_analyzed_document {
     my ($self, $message) = @_;
     my $doc = {
-        # sender     => [ map { $_->address ||"" } $message->sender ],
-        # 'return-path' => [($message->head->study("return-path") // "").""],
-        # 'message-id'  => [($message->head->study("message-id") // "").""],
-        # 'reply-to' => [($message->head->study("reply-to") // "").""],
+        'reply-to' => [($message->head->study("reply-to") // "").""],
+        'list-id'  => [(($message->head->study("List-Id") // "")."")],
 
-        'delivered-to' => [($message->head->study("delivered-to") // "").""],
         'from.name' => [ (map { ($_->name||"") } $message->from) ],
         fromish => [
             uniq grep { $_ } map { $_ ? split(/[ \(\)\[\]]/, $_) : () } (
@@ -21,7 +18,6 @@ sub convert_mail_message_to_analyzed_document {
                 (map { $_->address ||"" } $message->sender),
             )
         ],
-        'list-id'  => [(($message->head->study("List-Id") // "")."")],
 
         'to.name'    => [ map { $_->name    ||"" } $message->to ],
         'to.address' => [ map { $_->address ||"" } $message->to ],
@@ -55,32 +51,19 @@ sub convert_mail_message_to_analyzed_document {
         }
     }
 
-    # for my $h ("to.name", "subject") {
-    #     $doc->{"$h is empty"} = [ exists($doc->{$h}) ? "false" : "true" ];
-    # }
-
-    if ($doc->{'to.name'} &&  $doc->{'delivered-to'}) {
-        $doc->{'to.name + delivered-to'} = [
-            $doc->{'to.name'}[0] . ' ' . $doc->{'delivered-to'}[0]
-        ];
-    }
-
-    delete $doc->{subject};
-    delete $doc->{'delivered-to'};
-    delete $doc->{'to.address'};
-
     my @headers = keys %$doc;
     my $doc2 = {};
     for my $fields (@{scalar cartesian { [ sort ($_[0], $_[1]) ] } (\@headers, \@headers)}) {
         next if $fields->[0] eq $fields->[1];
+        next if $fields->[0] eq 'to.address' && $fields->[1] eq 'to.name';
+        next if $fields->[1] eq 'to.address' && $fields->[0] eq 'to.name';
         if ( @{$doc->{$fields->[0]}} && @{$doc->{$fields->[1]}} ) {
-            my $h = $fields->[0] . "," . $fields->[1];
-            next if $doc2->{$h};
-            $doc2->{$h} //= [@{ scalar cartesian { $_[0] . " " . $_[1] } ($doc->{$fields->[0]}, $doc->{$fields->[1]}) }];
+            my $ha = $fields->[0] . "," . $fields->[1];
+            my $hb = $fields->[1] . "," . $fields->[0];
+            next if $doc2->{$ha} || $doc2->{$hb};
+            $doc2->{$ha} //= [@{ scalar cartesian { $_[0] . " " . $_[1] } ($doc->{$fields->[0]}, $doc->{$fields->[1]}) }];
         }
     }
-    delete @{$doc2}{@headers};
-    $doc2->{subject_shingle5} = $doc->{subject_shingle5};
     return $doc2;
 }
 
