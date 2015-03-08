@@ -22,7 +22,7 @@ sub execute {
     my $folder_name = $self->folder;
 
     my $index_directory = $self->xdg->data_home->subdir("index");
-    mkdir( $index_directory ) unless -d $index_directory;
+    $index_directory->mkpath() unless -d $index_directory;
 
     my $classifier = Mailsheep::Categorizer->new( store => $index_directory );
 
