@@ -21,7 +21,10 @@ sub execute {
 
     my $folder_name = $self->folder;
 
-    my $classifier = Mailsheep::Categorizer->new( store => $self->config->{index_dir} );
+    my $index_directory = $self->xdg->data_home->subdir("index");
+    mkdir( $index_directory ) unless -d $index_directory;
+
+    my $classifier = Mailsheep::Categorizer->new( store => $index_directory );
 
     my $mgr = $self->mail_box_manager;
     my $folder = $mgr->open("=${folder_name}", access => "rw", remove_when_empty => 0) or die "$folder_name does not exists\n";

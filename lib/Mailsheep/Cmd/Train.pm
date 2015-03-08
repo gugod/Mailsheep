@@ -11,12 +11,10 @@ use Mailsheep::Categorizer;
 
 sub execute {
     my ($self) = @_;
-    my $index_directory = $self->config->{index_dir};
+    my $index_directory = $self->xdg->data_home->subdir("index");
     mkdir( $index_directory ) unless -d $index_directory;
 
-    my $classifier = Mailsheep::Categorizer->new(
-        store => $self->config->{index_dir}
-    );
+    my $classifier = Mailsheep::Categorizer->new(store => $index_directory);
 
     my $forkman = Parallel::ForkManager->new(4);
     for my $folder (@{ $self->config->{folders} }) {
