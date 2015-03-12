@@ -11,25 +11,28 @@ sub convert_mail_message_to_analyzed_document {
         'reply-to' => [($message->head->study("reply-to") // "").""],
         'list-id'  => [(($message->head->study("List-Id") // "")."")],
 
-        'from.name' => [ (map { ($_->name||"") } $message->from) ],
-        fromish => [
-            uniq grep { $_ } map { $_ ? split(/[ \(\)\[\]]/, $_) : () } (
-                (map { ($_->address ||"",  $_->name||"" ) } $message->from),
-                (map { $_->address ||"" } $message->sender),
-            )
-        ],
+        'from-asis' => [ $message->head->get("From") ],
+        # 'from.name' => [ (map { ($_->name||"") } $message->from) ],
+        # fromish => [
+        #     uniq grep { $_ } map { $_ ? split(/[ \(\)\[\]]/, $_) : () } (
+        #         (map { ($_->address ||"",  $_->name||"" ) } $message->from),
+        #         (map { $_->address ||"" } $message->sender),
+        #     )
+        # ],
 
-        'to.name'    => [ map { $_->name    ||"" } $message->to ],
-        'to.address' => [ map { $_->address ||"" } $message->to ],
+        'sender' => [ map { ($_->name||"") .";". ($_->address||"") } $message->sender ],
+        'to'     => [ map { ($_->name||"") .";". ($_->address||"") } $message->to ],
+        # 'to.name'    => [ map { $_->name    ||"" } $message->to ],
+        # 'to.address' => [ map { $_->address ||"" } $message->to ],
 
         subject    => [ ($message->head->study("subject")  // "")."" ],
     };
 
     for my $subject (@{$doc->{subject}}) {
         my @t = Mailsheep::Analyzer::standard($subject);
-        push @{$doc->{subject_shingle5}}, Mailsheep::Analyzer::sorted_shingle(5, @t);
+        push @{$doc->{subject_shingle}}, Mailsheep::Analyzer::sorted_shingle(3, @t);
     }
-    $doc->{subject_shingle5} = [uniq(@{$doc->{subject_shingle5}})];
+    $doc->{subject_shingle} = [uniq(@{$doc->{subject_shingle5}})];
 
     my @received = map {
         my @tok = split(/(\Afrom|by|with|for|;)/, $_);
@@ -41,9 +44,7 @@ sub convert_mail_message_to_analyzed_document {
 
     for my $h (keys %$doc) {
         for (@{$doc->{$h}}) {
-            s/\s+/ /g;
-            s/\A\s//;
-            s/\s\z//;            
+            s/\s+//g;
         }
         @{$doc->{$h}} = grep { $_ ne '' } @{$doc->{$h}};
         if (@{$doc->{$h}} == 0) {
@@ -53,17 +54,18 @@ sub convert_mail_message_to_analyzed_document {
 
     my @headers = keys %$doc;
     my $doc2 = {};
-    for my $fields (@{scalar cartesian { [ sort ($_[0], $_[1]) ] } (\@headers, \@headers)}) {
-        next if $fields->[0] eq $fields->[1];
-        next if $fields->[0] eq 'to.address' && $fields->[1] eq 'to.name';
-        next if $fields->[1] eq 'to.address' && $fields->[0] eq 'to.name';
-        if ( @{$doc->{$fields->[0]}} && @{$doc->{$fields->[1]}} ) {
+    (cartesian { [ sort ($_[0], $_[1]) ] } (\@headers, \@headers))->each(
+        sub {
+            my $fields = $_;
+            return if $fields->[0] eq $fields->[1];
+            # return if $fields->[0] eq 'to.address' && $fields->[1] eq 'to.name';
+
+            return unless ( @{$doc->{$fields->[0]}} && @{$doc->{$fields->[1]}} );
             my $ha = $fields->[0] . "," . $fields->[1];
-            my $hb = $fields->[1] . "," . $fields->[0];
-            next if $doc2->{$ha} || $doc2->{$hb};
-            $doc2->{$ha} //= [@{ scalar cartesian { $_[0] . " " . $_[1] } ($doc->{$fields->[0]}, $doc->{$fields->[1]}) }];
+            return if $doc2->{$ha};
+            $doc2->{$ha} //= [ (cartesian { $_[0] . "," . $_[1] } ($doc->{$fields->[0]}, $doc->{$fields->[1]}))->all ];
         }
-    }
+    );
     return $doc2;
 }
 
