@@ -1,3 +1,4 @@
+requires 'App::Cmd'              => '0.327';
 requires 'Digest::SHA1'          => '2.13';
 requires 'JSON'                  => '2.90';
 requires 'List::MoreUtils'       => '0.33';

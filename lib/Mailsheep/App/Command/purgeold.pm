@@ -1,5 +1,6 @@
-package Mailsheep::Cmd::PurgeOld;
+package Mailsheep::App::Command::purgeold;
 use v5.12;
+use Diversion::App -command;
 
 use Moo; with(
     'Mailsheep::Role::Cmd',

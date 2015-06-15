@@ -1,25 +1,29 @@
-package Mailsheep::Cmd::Categorize;
+package Mailsheep::App::Command::categorize;
 use v5.12;
+use Diversion::App -command;
 
 use Moo; with(
     'Mailsheep::Role::Cmd',
     'Mailsheep::MailMessageConvertor'
 );
 
+sub opt_spec {
+    return (
+        [ "folder=s",  "Classify unread messages from this folder", { default => "INBOX" } ],
+        [ "dry-run",   "Do not move the message, just display the result." ],
+        [ "all-message",   "Classify all messages instead of only unread ones" ],
+        [ "explain",   "Explain the classifying process more verbosely." ],
+    );
+}
+
 use Mailsheep::Categorizer;
 use JSON;
 my $JSON = JSON->new->pretty->canonical;
 
-has folder => (is => "ro", default => sub { "INBOX" });
-
-has dry_run => ( is => "ro", default => 0 );
-has all_message => ( is => "ro", default => 0 );
-has explain  => ( is => "ro", default => 0 );
-
 sub execute {
-    my ($self) = @_;
+    my ($self, $opt) = @_;
 
-    my $folder_name = $self->folder;
+    my $folder_name = $opt->{folder};
 
     my $index_directory = $self->xdg->data_home->subdir("index");
     $index_directory->mkpath() unless -d $index_directory;
@@ -40,7 +44,7 @@ sub execute {
     my $count_message = $folder->messages;
     for my $i (0..$count_message-1) {
         my $message = $folder->message($i);
-        next if $message->labels()->{seen} && !($self->all_message);
+        next if $message->labels()->{seen} && !($opt->{'all-message'});
 
         my $doc = $self->convert_mail_message_to_analyzed_document( $message );
         my $mail_message_subject = $message->head->study("subject") // "";
@@ -50,13 +54,13 @@ sub execute {
             if ($category eq $folder_name) {
                 say(join("\t", $category, "==", $answer->{guess}[0]{field}, "(".join(";", @{$doc->{$answer->{guess}[0]{field}}}).")", $mail_message_subject));
             } else {
-                $mgr->moveMessage($folder{$category}, $message) unless $self->dry_run;
+                $mgr->moveMessage($folder{$category}, $message) unless $opt->{'dry-run'};
                 say(join("\t", $category, "<=", $answer->{guess}[0]{field}, "(".join(";", @{$doc->{$answer->{guess}[0]{field}}}).")", $mail_message_subject));
             }
         } else {
             say(join("\t","(????)", "<=", "(????)", $mail_message_subject));
         }
-        if ($self->explain) {
+        if ($opt->{explain}) {
             say("\t" .$JSON->encode( $answer ) );
         }
     }

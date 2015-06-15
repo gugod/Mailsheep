@@ -1,17 +1,21 @@
-package Mailsheep::Cmd::ReadAll;
-
+package Mailsheep::App::Command::readall;
 use v5.12;
+use Diversion::App -command;
 
 use Moo; with(
     'Mailsheep::Role::Cmd',
     'Mailsheep::MailMessageConvertor'
 );
 
-has folder => (is => "ro", required => 1);
+sub opt_spec {
+    return (
+        [ "folder=s",  "The folder name." ]
+    );
+}
 
 sub execute {
-    my $self = shift;
-    my $folder_name = $self->folder;
+    my ($self, $opt) = @_;
+    my $folder_name = $opt->{folder};
 
     my $folder = $self->mail_box_manager->open("=${folder_name}", access => "rw", remove_when_empty => 0) or die "$folder_name does not exists\n";
     $folder->acceptMessages();

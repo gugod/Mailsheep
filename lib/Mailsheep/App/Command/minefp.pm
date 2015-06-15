@@ -1,5 +1,7 @@
-package Mailsheep::Cmd::MineFp;
+package Mailsheep::App::Command::minefp;
 use v5.12;
+use Diversion::App -command;
+
 use Moo; with('Mailsheep::Role::Cmd');
 
 use Tree::FP;
@@ -7,7 +9,11 @@ use YAML;
 
 use Mailsheep::Analyzer;
 
-has folder => (is => "ro", default => sub { "INBOX" });
+sub opt_spec {
+    return (
+        [ "folder=s",  "The folder name." ]
+    );
+}
 
 sub tokenize {
     my ($self, $message) = @_;
@@ -39,12 +45,12 @@ sub tokenize {
 }
 
 sub execute {
-    my ($self) = @_;
+    my ($self, $opt) = @_;
 
     my %tf;
     my @doc;
 
-    my $folder_name = $self->folder;
+    my $folder_name = $opt->{folder};
     my $mgr = $self->mail_box_manager;
     my $folder = $mgr->open("=${folder_name}", access => "r") or die "$folder_name does not exists\n";
     my $count_message = $folder->messages;

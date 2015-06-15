@@ -1,11 +1,17 @@
-package Mailsheep::Cmd::FolderStats;
+package Mailsheep::App::Command::folderstats;
 use v5.12;
+use Diversion::App -command;
+
 use Moo; with('Mailsheep::Role::Cmd');
 
-has histogram => (is => "ro");
+sub opt_spec {
+    return (
+        [ "histogram=n",  "Comma-separated list of fields" ]
+    );
+}
 
 sub execute {
-    my $self = shift;
+    my ($self, $opt, $args) = @_;
 
     my $mgr = $self->mail_box_manager;
     my %folder;
@@ -23,13 +29,13 @@ sub execute {
     }
 
     my %histograms;
-    my $histogram_interval = (defined($self->histogram) ? ($self->histogram)*86400 : undef);
+    my $histogram_interval = (defined($opt->{histogram}) ? ($opt->{histogram})*86400 : undef);
     my $now = time;
     for my $box (values %folder) {
         my %hist;
         my %label;
         for my $message ($box->messages) {
-            if (defined($self->histogram)) {
+            if (defined($opt->{histogram})) {
                 my $bucket = int(($now - $message->timestamp)/$histogram_interval);
                 $hist{$bucket}++;
             }
@@ -38,7 +44,7 @@ sub execute {
             }
         }
         $stats{"$box"}{label} = \%label;
-        if (defined($self->histogram)) {
+        if (defined($opt->{histogram})) {
             $stats{"$box"}{histogram} = join ",", map { $hist{$_} } sort { $a <=> $b } keys %hist;
         }
     }

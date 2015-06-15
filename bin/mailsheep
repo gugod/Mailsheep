@@ -11,35 +11,8 @@ local $SIG{__WARN__} = sub {
 use FindBin;
 use lib "${FindBin::Bin}/../lib";
 
-sub camelcase {
-    my $n = lc($_[0]);
-    $n =~ s/(\A|[\-_])(\w)/uc($2)/eg;
-    return $n;
-}
-
-my $command = "help";
-
-if (@ARGV > 0) {
-    $command = shift(@ARGV);
-}
+use Mailsheep::App;
 
 binmode STDOUT, ":utf8";
 
-my $cmd_class = "Mailsheep::Cmd::" . ( camelcase($command) );
-eval "require $cmd_class;" or do {
-    die "Unknown command: $command\n (cmd_class = $cmd_class)\n";
-};
-
-my @param;
-for (@ARGV) {
-    if (/\A--(?<optname>.+)\z/) {
-        my $n = lc($+{optname});
-        $n =~ s{-}{_}g;
-        push @param, $n;
-    } else {
-        push @param, $_;
-    }
-}
-
-$cmd_class->new(@param)->execute();
-
+Mailsheep::App->new->run;

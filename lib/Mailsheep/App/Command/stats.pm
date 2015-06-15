@@ -1,16 +1,21 @@
-package Mailsheep::Cmd::Stats;
+package Mailsheep::App::Command::stats;
 use v5.12;
-use Moo; with('Mailsheep::Role::Cmd');
+use Diversion::App -command;
 
-has fields => (
-    is => "ro",
-    default => "From"
+use Moo; with(
+    'Mailsheep::Role::Cmd',
 );
 
-sub execute {
-    my $self = shift;
+sub opt_spec {
+    return (
+        [ "fields=s",  "Comma-separated list of fields", { default => "From" } ]
+    );
+}
 
-    my $fields = [ split ",", $self->fields ];
+sub execute {
+    my ($self, $opt, $args) = @_;
+
+    my $fields = [ split ",", $opt->{fields} ];
     my $aggregation = $self->aggregate($fields);
 
     printf("%10s %-60s\n", "Messages", join(",",@$fields));

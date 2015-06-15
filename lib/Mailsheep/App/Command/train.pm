@@ -1,5 +1,6 @@
-package Mailsheep::Cmd::Train;
+package Mailsheep::App::Command::train;
 use v5.12;
+use Diversion::App -command;
 
 use Moo; with(
     'Mailsheep::Role::Cmd',
