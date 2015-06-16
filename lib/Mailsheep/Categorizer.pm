@@ -26,7 +26,8 @@ sub _build_idx {
     my $store = $self->store;
     my $sereal = Sereal::Decoder->new;
     for my $fn (<$store/*.sereal>) {
-        my $box_name = basename($fn) =~ s/\.sereal$//r;
+        next unless basename($fn) =~ m/\A (?<boxname>.+) \. (?<ts>[0-9]+) \.sereal$/x;
+        my $box_name = $+{boxname};
         next if lc($box_name) eq 'inbox';
         open my $fh, "<", $fn;
         local $/ = undef;
@@ -61,12 +62,14 @@ sub train {
         }
     }
 
+    my $ts = time();
+
     my $sereal = Sereal::Encoder->new;
-    open my $fh, ">", File::Spec->catdir($self->store, "${category}.sereal");
+    open my $fh, ">", File::Spec->catdir($self->store, "${category}.${ts}.sereal");
     print $fh $sereal->encode($idx);
     close($fh);
 
-    open $fh, ">", File::Spec->catdir($self->store, "${category}.yml");
+    open $fh, ">", File::Spec->catdir($self->store, "${category}.${ts}.yml");
     print $fh encode_utf8(YAML::Dump($idx));
     close($fh);
 }
