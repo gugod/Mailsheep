@@ -21,6 +21,7 @@ sub convert_mail_message_to_analyzed_document {
 
         'to'     => [ map { ($_->name||"") ."_". ($_->address||"") } $message->to ],
         subject  => [ ($message->head->study("subject")  // "")."" ],
+        '!date'  => [ (! $message->head->get("Date")) ],
     };
 
     for my $subject (@{$doc->{subject}}) {
