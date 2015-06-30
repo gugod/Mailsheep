@@ -44,19 +44,19 @@ sub execute {
     my $count_message = $folder->messages;
     for my $i (0..$count_message-1) {
         my $message = $folder->message($i);
-        next if $message->labels()->{seen} && !($opt->{'all-message'});
+        next if $message->labels()->{seen} && !($opt->{all_message});
 
         my $doc = $self->convert_mail_message_to_analyzed_document( $message );
         my $mail_message_subject = $message->head->study("subject") // "";
 
         my $answer = $classifier->classify($doc);
         if (my $category = $answer->{category}) {
-            if ($category eq $folder_name) {
-                say(join("\t", $category, "==", $answer->{guess}[0]{field}, "(".join(";", @{$doc->{$answer->{guess}[0]{field}}}).")", $mail_message_subject));
-            } else {
-                $mgr->moveMessage($folder{$category}, $message) unless $opt->{'dry-run'};
-                say(join("\t", $category, "<=", $answer->{guess}[0]{field}, "(".join(";", @{$doc->{$answer->{guess}[0]{field}}}).")", $mail_message_subject));
+            my $op = "==";
+            if ($category ne $folder_name) {
+                $mgr->moveMessage($folder{$category}, $message) unless $opt->{dry_run};
+                $op = "<=";
             }
+            say(join("\t", $category, "==", $answer->{guess}[0]{field}, "(".join(";", @{$doc->{$answer->{guess}[0]{field}}}).")", $mail_message_subject));
         } else {
             say(join("\t","(????)", "<=", "(????)", $mail_message_subject));
         }
