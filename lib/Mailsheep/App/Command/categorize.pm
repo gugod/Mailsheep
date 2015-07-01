@@ -52,8 +52,8 @@ sub execute {
         my $answer = $classifier->classify($doc);
         if (my $category = $answer->{category}) {
             my $op = "==";
-            if ($category ne $folder_name) {
-                $mgr->moveMessage($folder{$category}, $message) unless $opt->{dry_run};
+            if ($category ne $folder_name and my $f = $folder{$category}) {
+                $mgr->moveMessage($f, $message) unless $opt->{dry_run};
                 $op = "<=";
             }
             say(join("\t", $category, "==", $answer->{guess}[0]{field}, "(".join(";", @{$doc->{$answer->{guess}[0]{field}}}).")", $mail_message_subject));
