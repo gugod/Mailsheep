@@ -1,5 +1,7 @@
 package Mailsheep::App::Command::folderstats;
-use v5.12;
+use v5.14;
+use warnings;
+
 use Mailsheep::App -command;
 
 use Moo; with('Mailsheep::Role::Cmd');

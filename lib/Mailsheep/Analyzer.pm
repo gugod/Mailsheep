@@ -1,6 +1,7 @@
 package Mailsheep::Analyzer;
-use v5.12;
-use strict;
+use v5.14;
+use warnings;
+
 use List::MoreUtils qw(uniq);
 use Unicode::UCD qw(charscript);
 

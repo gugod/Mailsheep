@@ -1,5 +1,7 @@
 package Mailsheep::Categorizer;
-use v5.12;
+use v5.14;
+use warnings;
+
 use Moo;
 use YAML;
 use Sereal::Encoder;

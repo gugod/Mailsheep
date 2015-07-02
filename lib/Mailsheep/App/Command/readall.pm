@@ -1,7 +1,8 @@
 package Mailsheep::App::Command::readall;
 # ABSTRACT: mark all as read!
+use v5.14;
+use warnings;
 
-use v5.12;
 use Mailsheep::App -command;
 use Moo; with(
     'Mailsheep::Role::Cmd',
