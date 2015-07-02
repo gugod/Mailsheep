@@ -1,4 +1,6 @@
 package Mailsheep::App::Command::train;
+# ABSTRACT: Learn the classification rule with mails in folders.
+
 use v5.12;
 use Mailsheep::App -command;
 

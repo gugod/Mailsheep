@@ -1,4 +1,6 @@
 package Mailsheep::App::Command::purgeold;
+# ABSTRACT: remove mails older than retention period of its folder
+
 use v5.12;
 use Mailsheep::App -command;
 

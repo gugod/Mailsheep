@@ -1,4 +1,5 @@
 package Mailsheep::App::Command::categorize;
+# ABSTRACT: classify and move mails to different mail folders.
 use v5.12;
 use Mailsheep::App -command;
 
