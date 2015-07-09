@@ -8,7 +8,7 @@ use Sereal::Encoder;
 use Sereal::Decoder;
 use File::Basename qw(basename);
 use Encode 'encode_utf8';
-use List::Util qw(sum);
+use List::Util qw(sum max);
 use List::MoreUtils qw(uniq);
 
 has store => (
@@ -23,14 +23,20 @@ has idx => (
 
 sub _build_idx {
     my $self = shift;
+    my $idxf = {};
     my $idx = {};
-
     my $store = $self->store;
     my $sereal = Sereal::Decoder->new;
     for my $fn (<$store/*.sereal>) {
         next unless basename($fn) =~ m/\A (?<boxname>.+) \. (?<ts>[0-9]+) \.sereal$/x;
         my $box_name = $+{boxname};
         next if lc($box_name) eq 'inbox';
+        $idxf->{$box_name}{$+{ts}} = $fn;
+    }
+
+    for my $box_name (keys %$idxf) {
+        my $latest = max(keys %{ $idxf->{$box_name} });
+        my $fn = $idxf->{$box_name}{$latest};
         open my $fh, "<", $fn;
         local $/ = undef;
         $idx->{$box_name} = $sereal->decode(<$fh>);
