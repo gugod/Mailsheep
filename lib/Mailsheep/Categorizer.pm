@@ -6,6 +6,8 @@ use Moo;
 use YAML;
 use Sereal::Encoder;
 use Sereal::Decoder;
+use Hash::Flatten qw(flatten unflatten);
+
 use File::Basename qw(basename);
 use Encode 'encode_utf8';
 use List::Util qw(sum max);
@@ -35,13 +37,41 @@ sub _build_idx {
     }
 
     for my $box_name (keys %$idxf) {
-        my $latest = max(keys %{ $idxf->{$box_name} });
+        my @all_idx_t = sort { $b <=> $a } keys %{ $idxf->{$box_name} };
+        my $latest = shift @all_idx_t;
+
         my $fn = $idxf->{$box_name}{$latest};
         open my $fh, "<", $fn;
         local $/ = undef;
         $idx->{$box_name} = $sereal->decode(<$fh>);
+        close($fh);
+
+        my $w = 0.9;
+        for my $t (@all_idx_t) {
+            my $fn = $idxf->{$box_name}{$t};
+            open my $fh, "<", $fn;
+            local $/ = undef;
+            my $x = $sereal->decode(<$fh>);
+            __merge_idx($idx->{$box_name}, $x, $w);
+            $w = $w * 0.9;
+            close($fh);
+        }
     }
     return $idx;
+}
+
+sub __merge_idx {
+    my ($x1, $x2, $w) = @_;
+    my $y1 = flatten($x1);
+    my $y2 = flatten($x2);
+    my $y0 = {};
+    for (keys %$y1) {
+        $y0->{$_} = $y1->{$_} + $w * ( delete($y2->{$_}) // 0);
+    }
+    for (keys %$y2) {
+        $y0->{$_} = $w * ( delete($y2->{$_}) // 0);
+    }
+    %$x1 = %{ unflatten($y0) };
 }
 
 sub train {
