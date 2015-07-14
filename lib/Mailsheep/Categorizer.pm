@@ -29,49 +29,16 @@ sub _build_idx {
     my $idx = {};
     my $store = $self->store;
     my $sereal = Sereal::Decoder->new;
-    for my $fn (<$store/*.sereal>) {
-        next unless basename($fn) =~ m/\A (?<boxname>.+) \. (?<ts>[0-9]+) \.sereal$/x;
-        my $box_name = $+{boxname};
-        next if lc($box_name) eq 'inbox';
-        $idxf->{$box_name}{$+{ts}} = $fn;
-    }
-
-    for my $box_name (keys %$idxf) {
-        my @all_idx_t = sort { $b <=> $a } keys %{ $idxf->{$box_name} };
-        my $latest = shift @all_idx_t;
-
-        my $fn = $idxf->{$box_name}{$latest};
+    for my $fn (<$store/*.merged.sereal>) {
+        next unless basename($fn) =~ m/\A (?<boxname>.+) \. merged \.sereal$/x;
+        my $boxname = $+{boxname};
+        next if lc($boxname) eq 'inbox';
         open my $fh, "<", $fn;
         local $/ = undef;
-        $idx->{$box_name} = $sereal->decode(<$fh>);
+        $idx->{$boxname} = $sereal->decode(<$fh>);
         close($fh);
-
-        my $w = 0.9;
-        for my $t (@all_idx_t) {
-            my $fn = $idxf->{$box_name}{$t};
-            open my $fh, "<", $fn;
-            local $/ = undef;
-            my $x = $sereal->decode(<$fh>);
-            __merge_idx($idx->{$box_name}, $x, $w);
-            $w = $w * 0.9;
-            close($fh);
-        }
     }
     return $idx;
-}
-
-sub __merge_idx {
-    my ($x1, $x2, $w) = @_;
-    my $y1 = flatten($x1);
-    my $y2 = flatten($x2);
-    my $y0 = {};
-    for (keys %$y1) {
-        $y0->{$_} = $y1->{$_} + $w * ( delete($y2->{$_}) // 0);
-    }
-    for (keys %$y2) {
-        $y0->{$_} = $w * ( delete($y2->{$_}) // 0);
-    }
-    %$x1 = %{ unflatten($y0) };
 }
 
 sub train {
@@ -110,6 +77,63 @@ sub train {
     open $fh, ">", File::Spec->catdir($self->store, "${category}.${ts}.yml");
     print $fh encode_utf8(YAML::Dump($idx));
     close($fh);
+
+    $self->merge_idx($category);
+}
+
+sub merge_idx {
+    my ($self, $category) = @_;
+
+    my $idxf = {};
+    my $idx = {};
+    my $store = $self->store;
+    my $sereal = Sereal::Decoder->new;
+    for my $fn (<$store/*.sereal>) {
+        next unless basename($fn) =~ m/\A ${category} \. (?<ts>[0-9]+) \.sereal$/x;
+        $idxf->{$+{ts}} = $fn;
+    }
+    my @all_idx_t = sort { $b <=> $a } keys %$idxf;
+    my $latest = shift @all_idx_t;
+
+    my $fn = $idxf->{$latest};
+    open my $fh, "<", $fn;
+    local $/ = undef;
+    $idx = $sereal->decode(<$fh>);
+    close($fh);
+
+    my $w = 0.9;
+    for my $t (@all_idx_t) {
+        my $fn = $idxf->{$t};
+        open my $fh, "<", $fn;
+        local $/ = undef;
+        my $x = $sereal->decode(<$fh>);
+        __merge_idx($idx, $x, $w);
+        $w = $w * 0.9;
+        close($fh);
+    }
+
+    $sereal = Sereal::Encoder->new;
+    open $fh, ">", File::Spec->catdir($self->store, "${category}.merged.sereal");
+    print $fh $sereal->encode($idx);
+    close($fh);
+
+    open $fh, ">", File::Spec->catdir($self->store, "${category}.merged.yml");
+    print $fh encode_utf8(YAML::Dump($idx));
+    close($fh);
+}
+
+sub __merge_idx {
+    my ($x1, $x2, $w) = @_;
+    my $y1 = flatten($x1);
+    my $y2 = flatten($x2);
+    my $y0 = {};
+    for (keys %$y1) {
+        $y0->{$_} = $y1->{$_} + $w * ( delete($y2->{$_}) // 0);
+    }
+    for (keys %$y2) {
+        $y0->{$_} = $w * ( delete($y2->{$_}) // 0);
+    }
+    %$x1 = %{ unflatten($y0) };
 }
 
 sub classify {
