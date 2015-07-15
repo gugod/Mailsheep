@@ -5,6 +5,7 @@ requires 'List::MoreUtils'       => '0.33';
 requires 'List::Gen'             => '0.974';
 requires 'Mail::Box::Manager'    => '2.115';
 requires 'Moo'                   => '1.005000';
+requires 'Hash::Flatten'         => '1.19';
 requires 'Parallel::ForkManager' => '0';
 requires 'Sereal::Decoder'       => '3.001';
 requires 'Sereal::Encoder'       => '3.001';
