@@ -11,18 +11,25 @@ use Moo; with(
     'Mailsheep::MailMessageConvertor'
 );
 
+sub opt_spec {
+    return (
+        [ "folder=s",  "Only train this folder" ]
+    );
+}
+
 use Parallel::ForkManager;
 use Mailsheep::Categorizer;
 
 sub execute {
-    my ($self) = @_;
+    my ($self, $opt) = @_;
     my $index_directory = $self->xdg->data_home->subdir("index");
     $index_directory->mkpath() unless -d $index_directory;
 
     my $classifier = Mailsheep::Categorizer->new(store => $index_directory);
 
+    my @folders = $opt->{folder} ? ({ name => $opt->{folder} }) : (@{ $self->config->{folders} });
     my $forkman = Parallel::ForkManager->new(4);
-    for my $folder (@{ $self->config->{folders} }) {
+    for my $folder (@folders) {
         $forkman->start and next;
         my $folder_name = $folder->{name};
         say $folder_name;
