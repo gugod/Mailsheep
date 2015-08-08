@@ -10,10 +10,22 @@ use Moo; with(
     'Mailsheep::MailMessageConvertor'
 );
 
+sub opt_spec {
+    return (
+        [ "folder=s",  "Only train this folder" ]
+    );
+}
+
 sub execute {
-    my $self = shift;
+    my ($self, $opt) = @_;
     my $now = time;
-    for my $folder_config (@{ $self->config->{folders} }) {
+
+    my @folders = @{ $self->config->{folders} };
+    if (defined($opt->{folder})) {
+        @folders = grep { $_->{name} eq $opt->{folder} } @folders;
+    }
+
+    for my $folder_config (@folders) {
         my $name = $folder_config->{name};
         my $retention = $folder_config->{retention} or next;
 
