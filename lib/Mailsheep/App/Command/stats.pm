@@ -1,4 +1,5 @@
 package Mailsheep::App::Command::stats;
+# ABSTRACT: do some basic statistic aggregations
 use v5.14;
 use warnings;
 

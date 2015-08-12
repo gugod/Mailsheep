@@ -1,4 +1,5 @@
 package Mailsheep::App::Command::folderstats;
+# ABSTRACT: show some basic statistic numbers per folder
 use v5.14;
 use warnings;
 
