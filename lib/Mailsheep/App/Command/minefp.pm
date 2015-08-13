@@ -52,26 +52,47 @@ sub execute {
     my %tf;
     my @doc;
 
-    my $folder_name = $opt->{folder};
     my $mgr = $self->mail_box_manager;
-    my $folder = $mgr->open("=${folder_name}", access => "r") or die "$folder_name does not exists\n";
-    my $count_message = $folder->messages;
-    for my $i (0..$count_message-1) {
-        my $message = $folder->message($i);
-        my $t = $self->tokenize($message);
-        push @doc, $t;
-        $tf{$_}++ for @$t;
+    my @folders;
+
+    if ($opt->{folder}) {
+        my $folder_name = $opt->{folder};
+        my $folder = $mgr->open("=${folder_name}", access => "r") or die "$folder_name does not exists\n";
+        push @folders, $folder;
+    } else {
+        for (@{$self->config->{folders}}) {
+            my $folder_name = $_->{name};
+            my $folder = $mgr->open("=${folder_name}", access => "r") or die "$folder_name does not exists\n";
+            push @folders, $folder;
+        }
     }
 
-    my $fptree = Tree::FP->new( sort { $tf{$b} <=> $tf{$a} } keys %tf );
-
+    for my $folder (@folders) {
+        my $count_message = $folder->messages;
+        for my $i (0..$count_message-1) {
+            my $message = $folder->message($i);
+            my $t = $self->tokenize($message);
+            if (@$t) {
+                push @doc, $t;
+                $tf{$_}++ for @$t;
+            }
+        }
+    }
+    
+    my @items = sort { $tf{$b} <=> $tf{$a} } keys %tf;
+    my $fptree = Tree::FP->new(@items);
     for my $t (@doc) {
-        $fptree->insert_tree(@$t);
+        if ( 0 == $fptree->insert_tree(@$t) ) {
+            die "fail to insert to tree: " . join(" ", @$t);
+        }
     }
+    say 0+@items;
     
-    
-    print YAML::Dump(\%tf);
-    
+    my @rules = $fptree->association_rules;
+    say "Rules: " . (0+@rules);
+    for (@rules) {
+        say join "\t", $_->left, $_->right, $_->support, $_->confidence;
+    }    
 }
 
 1;
