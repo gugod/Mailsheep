@@ -54,14 +54,18 @@ sub convert_mail_message_to_analyzed_document {
         sub {
             my $fields = $_;
             return if $fields->[0] eq $fields->[1];
-            # return if $fields->[0] eq 'to.address' && $fields->[1] eq 'to.name';
-
             return unless ( @{$doc->{$fields->[0]}} && @{$doc->{$fields->[1]}} );
+
             my $ha = $fields->[0] . "," . $fields->[1];
             return if $doc2->{$ha};
             $doc2->{$ha} //= [ (cartesian { $_[0] . "," . $_[1] } ($doc->{$fields->[0]}, $doc->{$fields->[1]}))->all ];
         }
     );
+
+    if ($doc->{subject_shingle}) {
+        $doc2->{subject_shingle} = $doc->{subject_shingle};
+    }
+
     return $doc2;
 }
 
