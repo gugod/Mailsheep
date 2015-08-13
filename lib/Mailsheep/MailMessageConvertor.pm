@@ -28,7 +28,7 @@ sub convert_mail_message_to_analyzed_document {
         my @t = Mailsheep::Analyzer::standard($subject);
         push @{$doc->{subject_shingle}}, Mailsheep::Analyzer::sorted_shingle(3, @t);
     }
-    $doc->{subject_shingle} = [uniq(@{$doc->{subject_shingle5}})];
+    $doc->{subject_shingle} = [uniq(@{$doc->{subject_shingle}})];
 
     my @received = map {
         my @tok = split(/(\Afrom|by|with|for|;)/, $_);
