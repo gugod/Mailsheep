@@ -1,5 +1,5 @@
 package Mailsheep::MailMessageConvertor;
-use v5.14;
+use v5.18;
 use Moo::Role;
 use Mailsheep::Analyzer;
 use List::Gen ':modify';
@@ -28,7 +28,7 @@ sub convert_mail_message_to_analyzed_document {
         my @t = Mailsheep::Analyzer::standard($subject);
         push @{$doc->{subject_shingle}}, Mailsheep::Analyzer::sorted_shingle(3, @t);
     }
-    $doc->{subject_shingle} = [uniq(@{$doc->{subject_shingle}})];
+    $doc->{subject_shingle} = [uniq(map { fc($_) } @{$doc->{subject_shingle}})];
 
     my @received = map {
         my @tok = split(/(\Afrom|by|with|for|;)/, $_);
@@ -55,12 +55,13 @@ sub convert_mail_message_to_analyzed_document {
             my $fields = $_;
             return if $fields->[0] eq $fields->[1];
             return unless ( @{$doc->{$fields->[0]}} && @{$doc->{$fields->[1]}} );
-
             my $ha = $fields->[0] . "," . $fields->[1];
             return if $doc2->{$ha};
             $doc2->{$ha} //= [ (cartesian { $_[0] . "," . $_[1] } ($doc->{$fields->[0]}, $doc->{$fields->[1]}))->all ];
         }
     );
+
+    delete $doc2->{'!date,to'};
 
     if ($doc->{subject_shingle}) {
         $doc2->{subject_shingle} = $doc->{subject_shingle};
