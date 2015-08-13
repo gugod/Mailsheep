@@ -72,7 +72,7 @@ sub ngram {
 sub shingle($@) {
     my ($size, @t) = @_;
     my @x;
-    for (0..$#t-$size) {
+    for (0..$#t+1-$size) {
         push @x, join " ", @t[$_ .. $_+$size-1];
     }
     return @x;
@@ -81,7 +81,7 @@ sub shingle($@) {
 sub sorted_shingle($@) {
     my ($size, @t) = @_;
     my @x;
-    for (0..$#t-$size) {
+    for (0..$#t+1-$size) {
         push @x, join " ", uniq(sort @t[$_ .. $_+$size-1]);
     }
     return @x;
