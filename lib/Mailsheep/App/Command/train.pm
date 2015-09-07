@@ -28,7 +28,7 @@ sub execute {
     my $classifier = Mailsheep::Categorizer->new(store => $index_directory);
 
     my @folders = $opt->{folder} ? ({ name => $opt->{folder} }) : (@{ $self->config->{folders} });
-    my $forkman = Parallel::ForkManager->new(4);
+    my $forkman = Parallel::ForkManager->new(2);
     for my $folder (@folders) {
         $forkman->start and next;
         my $folder_name = $folder->{name};
