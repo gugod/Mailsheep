@@ -45,6 +45,7 @@ sub execute {
         }
 
         $classifier->train($folder_name, \@documents);
+        $folder->close;
         $forkman->finish;
     }
     $forkman->wait_all_children;
