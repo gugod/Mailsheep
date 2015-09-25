@@ -27,7 +27,7 @@ sub execute {
         my $message = $folder->message($i);
         next if $message->label('seen');
         $message->label(seen => 1);
-        say "autoread: " . $message->head->study("subject");
+        say "autoread:\t" . $message->head->study("from") . "\t" . $message->head->study("subject");
     }
     $folder->close;
 }
