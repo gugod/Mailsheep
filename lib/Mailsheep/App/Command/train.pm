@@ -13,6 +13,7 @@ use Moo; with(
 
 sub opt_spec {
     return (
+        [ "workers=n",  "The number of worker process to fork" ],
         [ "folder=s",  "Only train this folder" ]
     );
 }
@@ -28,7 +29,7 @@ sub execute {
     my $classifier = Mailsheep::Categorizer->new(store => $index_directory);
 
     my @folders = $opt->{folder} ? ({ name => $opt->{folder} }) : (@{ $self->config->{folders} });
-    my $forkman = Parallel::ForkManager->new(2);
+    my $forkman = Parallel::ForkManager->new( $opt->{workers} ||1 );
     for my $folder (@folders) {
         $forkman->start and next;
         my $folder_name = $folder->{name};
