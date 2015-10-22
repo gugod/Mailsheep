@@ -3,7 +3,6 @@ use v5.14;
 use warnings;
 
 use Moo;
-use YAML;
 use Sereal::Encoder;
 use Sereal::Decoder;
 use Hash::Flatten qw(flatten unflatten);
@@ -74,10 +73,6 @@ sub train {
     print $fh $sereal->encode($idx);
     close($fh);
 
-    open $fh, ">", File::Spec->catdir($self->store, "${category}.${ts}.yml");
-    print $fh encode_utf8(YAML::Dump($idx));
-    close($fh);
-
     $self->merge_idx($category);
 }
 
@@ -115,10 +110,6 @@ sub merge_idx {
     $sereal = Sereal::Encoder->new;
     open $fh, ">", File::Spec->catdir($self->store, "${category}.merged.sereal");
     print $fh $sereal->encode($idx);
-    close($fh);
-
-    open $fh, ">", File::Spec->catdir($self->store, "${category}.merged.yml");
-    print $fh encode_utf8(YAML::Dump($idx));
     close($fh);
 }
 
