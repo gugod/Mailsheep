@@ -73,42 +73,53 @@ sub train {
     print $fh $sereal->encode($idx);
     close($fh);
 
-    $self->merge_idx($category);
+    $self->merge_idx($category, $idx);
 }
 
 sub merge_idx {
-    my ($self, $category) = @_;
+    my ($self, $category, $latest_idx) = @_;
 
     my $idxf = {};
     my $idx = {};
     my $store = $self->store;
     my $sereal = Sereal::Decoder->new;
-    for my $fn (<$store/*.sereal>) {
-        next unless basename($fn) =~ m/\A ${category} \. (?<ts>[0-9]+) \.sereal$/x;
-        $idxf->{$+{ts}} = $fn;
-    }
-    my @all_idx_t = sort { $b <=> $a } keys %$idxf;
-    my $latest = shift @all_idx_t;
 
-    my $fn = $idxf->{$latest};
-    open my $fh, "<", $fn;
-    local $/ = undef;
-    $idx = $sereal->decode(<$fh>);
-    close($fh);
+    my $current_merged_idx = File::Spec->catdir($self->store, "${category}.merged.sereal");
 
-    my $w = 0.9;
-    for my $t (@all_idx_t) {
-        my $fn = $idxf->{$t};
-        open my $fh, "<", $fn;
+    if (-f $current_merged_idx) {
+        my $w = 0.9;
+
+        open my $fh, "<", $current_merged_idx;
         local $/ = undef;
-        my $x = $sereal->decode(<$fh>);
-        __merge_idx($idx, $x, $w);
-        $w = $w * 0.9;
+        my $merged_idx = $sereal->decode(<$fh>);
         close($fh);
+
+        __merge_idx($idx, $latest_idx, 1);
+        __merge_idx($idx, $merged_idx, $w);
+    } else {
+        for my $fn (<$store/*.sereal>) {
+            next unless basename($fn) =~ m/\A ${category} \. (?<ts>[0-9]+) \.sereal$/x;
+            $idxf->{$+{ts}} = $fn;
+        }
+        my @all_idx_t = sort { $b <=> $a } keys %$idxf;
+        shift @all_idx_t;
+
+        __merged_idx($idx, $latest_idx, 1);
+
+        my $w = 0.9;
+        for my $t (@all_idx_t) {
+            my $fn = $idxf->{$t};
+            open my $fh, "<", $fn;
+            local $/ = undef;
+            my $x = $sereal->decode(<$fh>);
+            __merge_idx($idx, $x, $w);
+            $w = $w * 0.9;
+            close($fh);
+        }
     }
 
     $sereal = Sereal::Encoder->new;
-    open $fh, ">", File::Spec->catdir($self->store, "${category}.merged.sereal");
+    open my $fh, ">", $current_merged_idx;
     print $fh $sereal->encode($idx);
     close($fh);
 }
