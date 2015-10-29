@@ -7,7 +7,6 @@ use Mailsheep::App -command;
 use Moo; with('Mailsheep::Role::Cmd');
 
 use Tree::FP;
-use YAML;
 
 use Mailsheep::Analyzer;
 

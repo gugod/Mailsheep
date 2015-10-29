@@ -11,4 +11,4 @@ requires 'Parallel::ForkManager' => '0';
 requires 'Sereal::Decoder'       => '3.001';
 requires 'Sereal::Encoder'       => '3.001';
 requires 'Tree::FP'              => '0.04';
-requires 'YAML'                  => '0';
+
