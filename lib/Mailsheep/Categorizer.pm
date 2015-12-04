@@ -34,7 +34,8 @@ sub _build_idx {
         next if lc($boxname) eq 'inbox';
         open my $fh, "<", $fn;
         local $/ = undef;
-        $idx->{$boxname} = $sereal->decode(<$fh>);
+        my $x = <$fh>;
+        $idx->{$boxname} = $sereal->decode($x);
         close($fh);
     }
     return $idx;
