@@ -104,7 +104,7 @@ sub merge_idx {
         my @all_idx_t = sort { $b <=> $a } keys %$idxf;
         shift @all_idx_t;
 
-        __merged_idx($idx, $latest_idx, 1);
+        __merge_idx($idx, $latest_idx, 1);
 
         my $w = 0.9;
         for my $t (@all_idx_t) {
