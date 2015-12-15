@@ -46,10 +46,10 @@ sub do_map_reduce {
     my %STATS;
     for (values %folder) {
         for my $m ($_->messages) {
+            my $sender = $m->sender;
             my (@from) = $m->from;
             my (@to)   = $m->to;
-            eval "$opt->{e}";
-            die $@ if @$;
+            eval "$opt->{e}; 1" or die $@;
         }
     }
     return {
