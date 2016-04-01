@@ -96,7 +96,7 @@ sub print_distinct_features {
 
     for my $fk (keys %$features) {
         my $f = $features->{$fk}{total};
-        next unless $features->{$fk}{by_folder}{$folder_name} && $features->{$fk}{by_folder}{$folder_name} == $f;
+        next unless $f > 2 && $features->{$fk}{by_folder}{$folder_name} && $features->{$fk}{by_folder}{$folder_name} == $f;
         printf("%2.2f\t%d\t%d\t\t%s\n", $f / $count_message, $f, $count_message, $fk);
     }
     print "\n";
