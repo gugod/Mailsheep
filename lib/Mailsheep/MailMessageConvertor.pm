@@ -54,6 +54,7 @@ sub convert_mail_message_to_analyzed_document {
         sub {
             my $fields = $_;
             return if $fields->[0] eq $fields->[1];
+            return if index($fields->[0], "subject") >= 0 && index($fields->[1], "subject") > =0;
             return unless ( @{$doc->{$fields->[0]}} && @{$doc->{$fields->[1]}} );
             my $ha = $fields->[0] . "," . $fields->[1];
             return if $doc2->{$ha};
