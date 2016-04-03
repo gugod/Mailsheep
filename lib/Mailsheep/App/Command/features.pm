@@ -85,6 +85,25 @@ sub print_common_features {
     print "\n";
 }
 
+sub print_noise_features {
+    my ($self) = @_;
+
+    my $features = $self->{features};
+    my $count_message = $self->{folder}->messages;
+    my $folder_name = $self->{folder_name};
+
+    my $threshold = int(@{$self->config->{folders}} * 0.5);
+
+    print "# Noise Features\n";
+
+    for my $fk (keys %$features) {
+        my $f = $features->{$fk}{total};
+        next unless (keys %{$features->{$fk}{by_folder}} >= $threshold);
+        printf("%2.2f\t%d\t%d\t\t%s\n", $f / $count_message, $f, $count_message, $fk);
+    }
+    print "\n";
+}
+
 sub print_distinct_features {
     my ($self) = @_;
 
@@ -116,6 +135,7 @@ sub execute {
     $self->build_feature_index();
     $self->print_common_features();
     $self->print_distinct_features();
+    $self->print_noise_features();
 }
 
 1;
