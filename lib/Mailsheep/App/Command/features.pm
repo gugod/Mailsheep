@@ -89,8 +89,6 @@ sub print_noise_features {
     my ($self) = @_;
 
     my $features = $self->{features};
-    my $count_message = $self->{folder}->messages;
-    my $folder_name = $self->{folder_name};
 
     my $threshold = int(@{$self->config->{folders}} * 0.5);
 
@@ -98,8 +96,9 @@ sub print_noise_features {
 
     for my $fk (keys %$features) {
         my $f = $features->{$fk}{total};
-        next unless (keys %{$features->{$fk}{by_folder}} >= $threshold);
-        printf("%2.2f\t%d\t%d\t\t%s\n", $f / $count_message, $f, $count_message, $fk);
+        my $c = keys %{$features->{$fk}{by_folder}};
+        next unless ($c >= $threshold);
+        printf("%2.2f\t%d\t%d\t\t%s\n", $f / $c, $f, $c, $fk);
     }
     print "\n";
 }
