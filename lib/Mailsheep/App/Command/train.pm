@@ -95,7 +95,7 @@ sub remove_noise_features {
     for my $fk (keys %$features) {
         my $f = $features->{$fk}{total};
         my $c = keys %{$features->{$fk}{by_folder}};
-        next unless ($c >= $threshold);
+        next if $f > 1 && ($c < $threshold);
         delete $features->{$fk};
     }
 }
