@@ -32,6 +32,7 @@ sub execute {
     $self->build_feature_index;
     $self->remove_noise_features;
     $self->write_feature_index;
+    return;
 
     my $classifier = Mailsheep::Categorizer->new(store => $index_directory);
 
@@ -64,25 +65,31 @@ sub build_feature_index {
     my $mgr = $self->mail_box_manager;
 
     my %features;
+    my %folder_messages;
     for (@{$self->config->{folders}}) {
         my $name = $_->{name};
         my $folder = $mgr->open("=${name}", access => "r", remove_when_empty => 0) or die "$name does not exists\n";
 
-        my $count_message = $folder->messages;
+        my $count_message = $folder_messages{$name} =  $folder->messages;
         for (my $i = 0; $i < $count_message; $i++) {
             my $message = $folder->message($i);
+            next unless $message->labels()->{seen};
+
             my $doc = $self->convert_mail_message_to_analyzed_document( $message );
             for my $k (keys %$doc) {
                 for my $v (@{ $doc->{$k} }) {
                     my $fk = "$k\t=\t$v";
                     $features{$fk}{total}++;
                     $features{$fk}{by_folder}{$name}++;
+                    $features{$fk}{by_field}{$k}++;
+                    $features{$fk}{by_folder_and_feature}{"$name\t$fk"}++;
                 }
             }
         }
         $folder->close;
     }
     $self->{features} = \%features;
+    $self->{folder_messages} = \%folder_messages;
 }
 
 sub remove_noise_features {
@@ -93,9 +100,8 @@ sub remove_noise_features {
     my $threshold = int(@{$self->config->{folders}} * 0.5);
 
     for my $fk (keys %$features) {
-        my $f = $features->{$fk}{total};
         my $c = keys %{$features->{$fk}{by_folder}};
-        next if $f > 1 && ($c < $threshold);
+        next if ($c < $threshold);
         delete $features->{$fk};
     }
 }
@@ -106,12 +112,15 @@ sub write_feature_index {
     my $index_directory = $self->xdg->data_home->subdir("index")->subdir("features");
     $index_directory->mkpath;
 
-    my $features = $self->{features};
+    my $content = {
+        features => $self->{features},
+        folder_messages => $self->{folder_messages},
+    };
 
     my $ts = time;
     my $sereal = Sereal::Encoder->new;
     open my $fh, ">", $index_directory->file("features.${ts}.sereal");
-    print $fh $sereal->encode($features);
+    print $fh $sereal->encode($content);
     close($fh);
 }
 

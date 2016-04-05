@@ -26,7 +26,7 @@ sub convert_mail_message_to_analyzed_document {
 
     for my $subject (@{$doc->{subject}}) {
         my @t = Mailsheep::Analyzer::standard($subject);
-        push @{$doc->{subject_shingle}}, Mailsheep::Analyzer::sorted_shingle(3, @t);
+        push @{$doc->{subject_shingle}}, Mailsheep::Analyzer::shingle(3, @t);
     }
     $doc->{subject_shingle} = [uniq(map { fc($_) } @{$doc->{subject_shingle}})];
 
