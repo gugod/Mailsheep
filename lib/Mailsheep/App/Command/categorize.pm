@@ -83,7 +83,7 @@ sub execute {
                 }
             }
         }
-        if (keys %votes > 0 && $unknowns < $knowns ) {
+        if (keys %votes == 1 || (keys %votes > 0 && $unknowns < $knowns)) {
             my $f;
             my $op = "=";
             my ($category) = sort { $votes{$b} <=> $votes{$a} } keys %votes;
