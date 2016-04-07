@@ -19,11 +19,8 @@ sub opt_spec {
     );
 }
 
-use Mailsheep::Categorizer;
-use List::Util qw(max min);
 use File::Slurp qw(read_file);
 use Sereal::Decoder;
-use DDP;
 
 use JSON;
 my $JSON = JSON->new->canonical;
