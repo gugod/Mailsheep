@@ -5,6 +5,28 @@ use Mailsheep::Analyzer;
 use List::Gen ':modify';
 use List::MoreUtils 'uniq';
 
+sub convert_mail_message_to_simple_document {
+    my ($self, $message) = @_;
+    my $doc = {
+        'reply-to' => [($message->head->study("reply-to") // "").""],
+        'list-id'  => [(($message->head->study("List-Id") // "")."")],
+        'from'   => [ map { $_->format } $message->from ] ,
+        'sender' => [ map { $_->format } $message->sender ] ,
+        'to'     => [ map { $_->format } $message->to ],
+        subject  => [ ($message->head->study("subject")  // "")."" ],
+        'body' => [ "". $message->body->decoded ],
+    };
+
+    for my $h (keys %$doc) {
+        @{$doc->{$h}} = grep { $_ ne '' } @{$doc->{$h}};
+        if (@{$doc->{$h}} == 0) {
+            delete $doc->{$h};
+        }
+    }
+
+    return $doc;
+}
+
 sub convert_mail_message_to_analyzed_document {
     my ($self, $message) = @_;
     my $doc = {
