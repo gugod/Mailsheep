@@ -1,4 +1,5 @@
 requires 'App::Cmd'              => '0.327';
+requires 'File::Slurp'           => '0';
 requires 'Digest::SHA1'          => '2.13';
 requires 'File::XDG'             => '0.04';
 requires 'Hash::Flatten'         => '1.19';
