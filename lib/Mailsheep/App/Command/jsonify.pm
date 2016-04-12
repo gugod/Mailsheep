@@ -10,6 +10,7 @@ use Mailsheep::App -command;
 use Moo; with(
     'Mailsheep::Role::Cmd',
     'Mailsheep::MailMessageConvertor',
+    'Mailsheep::MailMessageIterator',
 );
 
 sub opt_spec {
@@ -22,31 +23,15 @@ sub opt_spec {
 sub execute {
     my ($self, $opt, $args) = @_;
 
-    $self->do_map_reduce($opt, $args);
-    return;
-}
-
-sub do_map_reduce {
-    my ($self, $opt, $args) = @_;
-
-    my $mgr = $self->mail_box_manager;
-    my %folder;
-    if ($opt->{folder}) {
-        $folder{$opt->{folder}} = $mgr->open("=$opt->{folder}",  access => "r") or die "The mail box \"=$opt->{folder}\" cannot be opened.\n";
-    } else {
-        for my $folder (@{$self->config->{folders}}) {
-            my $x = $folder->{name};
-            $folder{$x} = $mgr->open("=${x}",  access => "r") or die "The mail box \"=$x\" cannot be opened.\n";
-        }
-    }
-
     my $JSON = JSON->new->pretty->canonical;
-    for (values %folder) {
-        for my $m ($_->messages) {
-            my $doc = $self->convert_mail_message_to_simple_document($m);
-            say $JSON->encode($doc);
-        }
-    }
+    $self->iterate_through_mails({
+        $opt->{folder} ? ( folder => $opt->{folder} ) : (),
+    }, sub {
+        my ($m) = @_;
+        my $doc = $self->convert_mail_message_to_simple_document($m);
+        say $JSON->encode($doc);
+    });
+
     return;
 }
 
