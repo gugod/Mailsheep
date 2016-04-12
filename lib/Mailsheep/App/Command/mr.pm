@@ -9,6 +9,7 @@ use Mailsheep::App -command;
 
 use Moo; with(
     'Mailsheep::Role::Cmd',
+    'Mailsheep::MailMessageIterator',
 );
 
 sub opt_spec {
@@ -32,26 +33,17 @@ sub execute {
 sub do_map_reduce {
     my ($self, $opt, $args) = @_;
 
-    my $mgr = $self->mail_box_manager;
-    my %folder;
-    if ($opt->{folder}) {
-        $folder{$opt->{folder}} = $mgr->open("=$opt->{folder}",  access => "r") or die "The mail box \"=$opt->{folder}\" cannot be opened.\n";
-    } else {
-        for my $folder (@{$self->config->{folders}}) {
-            my $x = $folder->{name};
-            $folder{$x} = $mgr->open("=${x}",  access => "r") or die "The mail box \"=$x\" cannot be opened.\n";
-        }
-    }
-
     my %STATS;
-    for (values %folder) {
-        for my $m ($_->messages) {
-            my $sender = $m->sender;
-            my (@from) = $m->from;
-            my (@to)   = $m->to;
-            eval "$opt->{e}; 1" or die $@;
-        }
-    }
+    $self->iterate_through_mails({
+        $opt->{folder} ? ( folder => $opt->{folder} ) : (),
+    }, sub {
+        my ($m) = @_;
+        my $sender = $m->sender;
+        my (@from) = $m->from;
+        my (@to)   = $m->to;
+        eval "$opt->{e}; 1" or die $@;
+    });
+
     return {
         stats => \%STATS
     };
