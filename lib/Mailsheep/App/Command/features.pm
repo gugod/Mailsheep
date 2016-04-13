@@ -1,4 +1,5 @@
 package Mailsheep::App::Command::features;
+# ABSTRACT: Display interesting features of folders.
 use v5.14;
 use strict;
 use warnings;

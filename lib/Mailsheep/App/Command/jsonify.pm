@@ -1,5 +1,5 @@
 package Mailsheep::App::Command::jsonify;
-# ABSTRACT: do map-reduce
+# ABSTRACT: Convert mail messages to JSON stream.
 use v5.14;
 use strict;
 use warnings;
