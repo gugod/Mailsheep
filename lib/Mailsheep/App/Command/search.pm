@@ -20,13 +20,17 @@ sub opt_spec {
 sub execute {
     my ($self, $opt, $args) = @_;
     my $query = join " ", @$args;
+    $query = qr/$query/;
 
     $self->iterate_through_mails({
         ($opt->{folder} ? ( folder => $opt->{folder} ) : ())
     }, sub {
         my ($message) = @_;
         my $subject = $message->subject;
-        say $subject if $subject =~ $query;
+        if ($subject =~ /$query/i) {
+            say $message->filename;
+            say "\tSubject: $subject";
+        }
     });
     
     return;
