@@ -11,6 +11,6 @@ requires 'Moo'                   => '1.005000';
 requires 'Parallel::ForkManager' => '0';
 requires 'Sereal::Decoder'       => '3.001';
 requires 'Sereal::Encoder'       => '3.001';
+requires 'Time::Moment'          => '0';
 requires 'Tree::FP'              => '0.04';
 requires 'Ref::Util'             => '0';
-
