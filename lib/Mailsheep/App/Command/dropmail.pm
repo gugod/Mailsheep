@@ -6,6 +6,7 @@ use Moo; with(
     'Mailsheep::Role::Cmd',
 );
 
+use File::Slurp qw(read_file);
 use Time::Moment;
 
 sub opt_spec {
@@ -22,9 +23,14 @@ sub execute {
 
     my $folder = $self->mail_box_manager->open("=${folder_name}", access => "rw", remove_when_empty => 0) or die "$folder_name does not exists\n";
 
+    my $body = $opt->{body};
+    if ($body eq '-') {
+        $body = read_file(\*STDIN);
+    }
+
     my $m = Mail::Message->new(
         body => Mail::Message::Body::Lines->new(
-            data => $opt->{body}
+            data => $body,
         ),
         head => Mail::Message::Head->build(
             Subject => $opt->{subject},
