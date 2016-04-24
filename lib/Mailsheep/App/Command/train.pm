@@ -68,7 +68,7 @@ sub remove_noise_features {
 
     my $features = $self->{features};
 
-    my $threshold = int(@{$self->config->{folders}} * 0.5);
+    my $threshold = int(@{$self->config->{folders}} * 0.4);
 
     for my $fk (keys %$features) {
         my $c = keys %{$features->{$fk}{by_folder}};
