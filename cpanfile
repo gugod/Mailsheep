@@ -6,6 +6,7 @@ requires 'Hash::Flatten'         => '1.19';
 requires 'JSON'                  => '2.90';
 requires 'List::Gen'             => '0.974';
 requires 'List::MoreUtils'       => '0.33';
+requires 'List::UtilsBy'         => '0.10';
 requires 'Mail::Box::Manager'    => '2.115';
 requires 'Moo'                   => '1.005000';
 requires 'Parallel::ForkManager' => '0';
