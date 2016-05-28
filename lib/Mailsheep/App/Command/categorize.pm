@@ -10,6 +10,9 @@ use Moo; with(
     'Mailsheep::MailMessageConvertor'
 );
 
+use List::UtilsBy qw(max_by);
+use List::Util qw(sum);
+
 sub opt_spec {
     return (
         [ "folder=s",  "Classify unread messages from this folder", { default => "INBOX" } ],
@@ -59,7 +62,7 @@ sub execute {
         my $doc = $self->convert_mail_message_to_analyzed_document( $message );
         my %votes;
         my $unknowns = 0;
-        my $knowns;
+        my $knowns   = 0;
         for my $k (keys %$doc) {
             for my $v (@{$doc->{$k}}) {
                 my $fk = "$k\t=\t$v";
@@ -80,18 +83,20 @@ sub execute {
                 }
             }
         }
-        if (keys %votes == 1 || (keys %votes > 0 && $unknowns < $knowns)) {
-            my $f;
+
+        my $total_votes = $knowns; # + $unknowns;
+        my $max_votes   = max_by { $_->[1] } map { [$_, $votes{$_}] } keys %votes;
+        if (keys %votes && $max_votes->[1] > 0.5 * $total_votes) {
+            my $category = $max_votes->[0];
             my $op = "=";
-            my ($category) = sort { $votes{$b} <=> $votes{$a} } keys %votes;
+            my $f;
             if ($category && $category ne $folder_name && ($f = $folder{$category})) {
                 $mgr->moveMessage($f, $message) unless $opt->{dry_run};
                 $op = "<";
             }
-            # say "\tUnknown: $unknowns, Known: $knowns";
-            say(join("\t", $category // "???", $op, $mail_message_subject, $JSON->encode(\%votes) ));
+            say(join("\t", $category // "???", $op, $JSON->encode({%votes, unknowns => $unknowns}), $mail_message_subject ));
         } else {
-            say(join("\t", "???", "=", $mail_message_subject, $JSON->encode(\%votes) ));
+            say(join("\t", "???", "=", $JSON->encode({%votes, unknowns => $unknowns}), $mail_message_subject,  ));
         }
     }
 }
