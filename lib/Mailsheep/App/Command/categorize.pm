@@ -86,7 +86,7 @@ sub execute {
 
         my $total_votes = $knowns; # + $unknowns;
         my $max_votes   = max_by { $_->[1] } map { [$_, $votes{$_}] } keys %votes;
-        if (keys %votes > 2 && $max_votes->[1] > 0.5 * $total_votes) {
+        if ($knowns > 2 && $max_votes->[1] > 0.5 * $total_votes) {
             my $category = $max_votes->[0];
             my $op = "=";
             my $f;
