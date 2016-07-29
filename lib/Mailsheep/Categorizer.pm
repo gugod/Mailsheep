@@ -67,6 +67,15 @@ sub train {
         }
     }
 
+    for my $field (keys %{$idx->{field}}) {
+        my $fidx = $idx->{field}{$field};
+        for my $t (keys %{$fidx->{token}}) {
+            if ($fidx->{token}{$t}{df} < 3) {
+                delete $fidx->{token}{$t};
+            }
+        }
+    }
+
     my $ts = time();
 
     my $sereal = Sereal::Encoder->new;
