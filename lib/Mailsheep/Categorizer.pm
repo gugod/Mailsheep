@@ -45,8 +45,13 @@ sub train {
     my ($self, $category, $documents) = @_;
 
     my $idx = {};
+
+    # { $token => { token_frequency => Int, document_frequency => Int, field_frequency => Int } }
+    my $idx_v2 = {};
+
     for my $document (@$documents) {
         $idx->{df}++;
+        my %seen_tokens_in_document;
         for my $field (keys %$document) {
             next unless defined $document->{$field};
 
@@ -55,15 +60,22 @@ sub train {
             $fidx->{tf} += @tokens;
             $idx->{tf}  += @tokens;
 
+
             my %seen;
             for my $token (@tokens) {
                 $fidx->{token}{$token}{tf}++;
                 $seen{$token}++;
+                $seen_tokens_in_document{$token}++;
+                $idx_v2->{$token}{token_frequency}++;
             }
             $fidx->{count_utoken} += keys %seen;
             for my $token (keys %seen) {
                 $fidx->{token}{$token}{df}++;
+                $idx_v2->{$token}{field_frequency}++;
             }
+        }
+        for my $token (keys %seen_tokens_in_document) {
+            $idx_v2->{$token}{document_frequency}++;
         }
     }
 
@@ -83,7 +95,12 @@ sub train {
     print $fh $sereal->encode($idx);
     close($fh);
 
+
     $self->merge_idx($category, $idx);
+
+    open $fh, ">", File::Spec->catdir($self->store, "${category}.${ts}.v2.sereal");
+    print $fh $sereal->encode($idx_v2);
+    close($fh);
 }
 
 sub merge_idx {
