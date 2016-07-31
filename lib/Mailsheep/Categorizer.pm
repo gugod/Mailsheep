@@ -47,7 +47,11 @@ sub train {
     my $idx = {};
 
     # { $token => [ token_frequency Int, document_frequency Int, field_frequency Int] }
-    my $idx_v2 = {};
+    my $idx_v2 = {
+        created_at => scalar(time),
+        features => {}
+    };
+    my $idx_v2_features = $idx_v2->{features};
 
     my %seen_tokens_in_documents;
     for my $document (@$documents) {
@@ -67,7 +71,7 @@ sub train {
                 $seen{$token}++;
                 $seen_tokens_in_documents{$token}++;
                 $seen_tokens_in_fields{$token}++;
-                $idx_v2->{$token}[0]++;
+                $idx_v2_features->{$token}[0]++;
             }
             $fidx->{count_utoken} += keys %seen;
             for my $token (keys %seen) {
@@ -75,11 +79,11 @@ sub train {
             }
         }
         for my $token (keys %seen_tokens_in_fields) {
-            $idx_v2->{$token}[1] += $seen_tokens_in_fields{$token};
+            $idx_v2_features->{$token}[1] += $seen_tokens_in_fields{$token};
         }
     }
     for my $token (keys %seen_tokens_in_documents) {
-        $idx_v2->{$token}[2] += $seen_tokens_in_documents{$token};
+        $idx_v2_features->{$token}[2] += $seen_tokens_in_documents{$token};
     }
 
     for my $field (keys %{$idx->{field}}) {
@@ -91,14 +95,11 @@ sub train {
         }
     }
 
-    my $ts = time();
-
+    my $ts = time;
     my $sereal = Sereal::Encoder->new;
     open my $fh, ">", File::Spec->catdir($self->store, "${category}.${ts}.sereal");
     print $fh $sereal->encode($idx);
     close($fh);
-
-
     $self->merge_idx($category, $idx);
 
     open $fh, ">", File::Spec->catdir($self->store, "${category}.${ts}.v2.sereal");
