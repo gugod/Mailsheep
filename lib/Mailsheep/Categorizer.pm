@@ -46,17 +46,13 @@ sub train {
 
     my $idx = {};
 
-    # { $token => [ token_frequency Int, document_frequency Int, field_frequency Int] }
-    my $idx_v2 = {
-        created_at => scalar(time),
-        features => {}
-    };
-    my $idx_v2_features = $idx_v2->{features};
+    # { $token => [ token_frequency Int, document_frequency Int] }
+    my $idx_v2_features = {};
+    my $idx_v2 = { created_at => scalar(time),  features => $idx_v2_features };
 
     my %seen_tokens_in_documents;
     for my $document (@$documents) {
         $idx->{df}++;
-        my %seen_tokens_in_fields;
         for my $field (keys %$document) {
             next unless defined $document->{$field};
 
@@ -69,21 +65,19 @@ sub train {
             for my $token (@tokens) {
                 $fidx->{token}{$token}{tf}++;
                 $seen{$token}++;
-                $seen_tokens_in_documents{$token}++;
-                $seen_tokens_in_fields{$token}++;
-                $idx_v2_features->{$token}[0]++;
+
+                my $token_with_prefix = $field . ':=' . $token;
+                $seen_tokens_in_documents{$token_with_prefix}++;
+                $idx_v2_features->{$token_with_prefix}[0]++;
             }
             $fidx->{count_utoken} += keys %seen;
             for my $token (keys %seen) {
                 $fidx->{token}{$token}{df}++;
             }
         }
-        for my $token (keys %seen_tokens_in_fields) {
-            $idx_v2_features->{$token}[1] += $seen_tokens_in_fields{$token};
-        }
     }
-    for my $token (keys %seen_tokens_in_documents) {
-        $idx_v2_features->{$token}[2] += $seen_tokens_in_documents{$token};
+    for my $t (keys %seen_tokens_in_documents) {
+        $idx_v2_features->{$t}[1] += $seen_tokens_in_documents{$t};
     }
 
     for my $field (keys %{$idx->{field}}) {
