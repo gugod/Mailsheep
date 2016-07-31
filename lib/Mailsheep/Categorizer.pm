@@ -95,6 +95,7 @@ sub train {
     print $fh $sereal->encode($idx);
     close($fh);
     $self->merge_idx($category, $idx);
+    $self->cleanup_idx($category);
 
     open $fh, ">", File::Spec->catdir($self->store, "${category}.${ts}.v2.sereal");
     print $fh $sereal->encode($idx_v2);
@@ -161,6 +162,21 @@ sub __merge_idx {
         $y0->{$_} = $w * ( delete($y2->{$_}) // 0);
     }
     %$x1 = %{ unflatten($y0) };
+}
+
+sub cleanup_idx {
+    my ($self, $category) = @_;
+    my $idxf = {};
+    my $store = $self->store;
+    for my $fn (<$store/*.sereal>) {
+        next unless basename($fn) =~ m/\A ${category} \. (?<ts>[0-9]+) \.sereal$/x;
+        $idxf->{$+{ts}} = $fn;
+    }
+    my @to_delete = sort { $a <=> $b } keys %$idxf;
+    splice @to_delete, -2, 2;
+    for (@to_delete) {
+        unlink($idxf->{$_});
+    }
 }
 
 sub classify {
