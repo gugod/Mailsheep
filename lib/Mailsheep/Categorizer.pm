@@ -177,6 +177,17 @@ sub cleanup_idx {
     for (@to_delete) {
         unlink($idxf->{$_});
     }
+
+    $idxf = {};
+    for my $fn (<$store/*.sereal>) {
+        next unless basename($fn) =~ m/\A ${category} \. (?<ts>[0-9]+) \.v2\.sereal$/x;
+        $idxf->{$+{ts}} = $fn;
+    }
+    @to_delete = sort { $a <=> $b } keys %$idxf;
+    splice @to_delete, -2, 2;
+    for (@to_delete) {
+        unlink($idxf->{$_});
+    }
 }
 
 sub classify {
