@@ -173,9 +173,11 @@ sub cleanup_idx {
         $idxf->{$+{ts}} = $fn;
     }
     my @to_delete = sort { $a <=> $b } keys %$idxf;
-    splice @to_delete, -2, 2;
-    for (@to_delete) {
-        unlink($idxf->{$_});
+    if (@to_delete > 2) {
+        splice @to_delete, -2, 2;
+        for (@to_delete) {
+            unlink($idxf->{$_});
+        }
     }
 
     $idxf = {};
@@ -184,9 +186,11 @@ sub cleanup_idx {
         $idxf->{$+{ts}} = $fn;
     }
     @to_delete = sort { $a <=> $b } keys %$idxf;
-    splice @to_delete, -2, 2;
-    for (@to_delete) {
-        unlink($idxf->{$_});
+    if (@to_delete > 2) {
+        splice @to_delete, -2, 2;
+        for (@to_delete) {
+            unlink($idxf->{$_});
+        }
     }
 }
 
