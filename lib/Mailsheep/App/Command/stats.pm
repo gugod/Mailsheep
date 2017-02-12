@@ -11,6 +11,7 @@ use Moo; with(
 
 sub opt_spec {
     return (
+        [ "folder=s",  "Comma-separated list of folders", { default => "INBOX" } ],
         [ "fields=s",  "Comma-separated list of fields", { default => "From" } ],
         [ "where=s",  "Constraint. Ex: To=me\@example.com" ]
     );
@@ -20,7 +21,7 @@ sub execute {
     my ($self, $opt, $args) = @_;
 
     my $fields = [ split ",", $opt->{fields} ];
-    my $aggregation = $self->aggregate($fields, $opt->{where});
+    my $aggregation = $self->aggregate($opt->{folder}, $fields, $opt->{where});
 
     printf("%10s %-60s\n", "Messages", join(",",@$fields));
     printf(("="x70)."\n");
@@ -30,13 +31,14 @@ sub execute {
 }
 
 sub aggregate {
-    my ($self, $fields, $constraint) = @_;
+    my ($self, $folder, $fields, $constraint) = @_;
     my %aggregation;
 
     my $mgr = $self->mail_box_manager;
     my %folder;
-    for my $folder (@{$self->config->{folders}}) {
-        my $x = $folder->{name};
+    for (@{$self->config->{folders}}) {
+        my $x = $_->{name};
+	next unless $x eq $folder;
         $folder{$x} = $mgr->open("=${x}",  access => "r") or die "The mail box \"=$x\" cannot be opened.\n";
     }
 
