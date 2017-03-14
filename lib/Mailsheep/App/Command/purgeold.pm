@@ -12,7 +12,8 @@ use Moo; with(
 
 sub opt_spec {
     return (
-        [ "folder=s",  "Only train this folder" ]
+        [ "folder=s",  "Only process this folder" ],
+        [ "retention=n",  "Use this retention setting instead of config file." ]
     );
 }
 
@@ -20,9 +21,11 @@ sub execute {
     my ($self, $opt) = @_;
     my $now = time;
 
-    my @folders = @{ $self->config->{folders} };
+    my @folders;
     if (defined($opt->{folder})) {
         @folders = grep { $_->{name} eq $opt->{folder} } @folders;
+    } else {
+        @folders = @{ $self->config->{folders} };
     }
 
     for my $folder_config (@folders) {
