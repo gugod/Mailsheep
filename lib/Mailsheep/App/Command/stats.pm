@@ -22,11 +22,11 @@ sub execute {
 
     my $fields = [ split ",", $opt->{fields} ];
     my $aggregation = $self->aggregate($opt->{folder}, $fields, $opt->{where});
-
+    my $message_count = $aggregation->{message_count};
     printf("%10s %-60s\n", "Messages", join(",",@$fields));
     printf(("="x70)."\n");
-    for (@$aggregation) {
-        printf("%10d %-60s\n", $_->[1], $_->[0]);
+    for (@{$aggregation->{frequency}}) {
+        printf("%4.2f %10d %-60s\n", $_->[1]/$message_count, $_->[1], $_->[0]);
     }
 }
 
@@ -36,16 +36,14 @@ sub aggregate {
 
     my $mgr = $self->mail_box_manager;
     my %folder;
-    for (@{$self->config->{folders}}) {
-        my $x = $_->{name};
-	next unless $x eq $folder;
-        $folder{$x} = $mgr->open("=${x}",  access => "r") or die "The mail box \"=$x\" cannot be opened.\n";
-    }
+    $folder{$folder} = $mgr->open("=${folder}",  access => "r") or die "The mail box \"=$folder\" cannot be opened.\n";
 
     my ($constraint_field, $constraint_value) = split(/=/, $constraint) if $constraint;
 
+    my $message_count = 0;
     for (values %folder) {
         for my $m ($_->messages) {
+            $message_count++;
             my @term;
             if ($constraint) {
                 my @v = $constraint_field eq 'From' ? (map{ $_->address} $m->from) : ($m->head->study($constraint_value));
@@ -60,7 +58,10 @@ sub aggregate {
             }
         }
     }
-    return [ map { [ $_, $aggregation{$_} ] } sort { $aggregation{$b} <=> $aggregation{$a} } keys %aggregation ];
+    return {
+        message_count => $message_count,
+        frequency => [ map { [ $_, $aggregation{$_} ] } sort { $aggregation{$b} <=> $aggregation{$a} } keys %aggregation ]
+    }
 }
 
 1;
