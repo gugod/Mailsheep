@@ -14,6 +14,8 @@ sub opt_spec {
         [ "folder=s",  "The folder name.", { default => "INBOX" } ],
         [ "body=s",  "The body of mail",   { default => 'No Body'} ],
         [ "subject=s",  "The subject of mail", { default => 'No Subject'} ],
+        [ "from=s",  "The value for 'From' mail header", { default => 'nobody@localhost'} ],
+        [ "to=s",    "The value for 'To' mail header", { default => 'nobody@localhost'} ],
     );
 }
 
@@ -34,8 +36,8 @@ sub execute {
         ),
         head => Mail::Message::Head->build(
             Subject => $opt->{subject},
-            From => 'nobody@localhost',
-            To   => 'nobody@localhost',
+            From => $opt->{from},
+            To   => $opt->{to},
             Date => Time::Moment->now_utc->strftime("%a, %d %b %Y %H:%M:%S GMT")
         )
     );

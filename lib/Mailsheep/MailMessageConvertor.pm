@@ -46,9 +46,15 @@ sub convert_mail_message_to_analyzed_document {
         '!date'  => [ (! $message->head->get("Date")) ],
     };
 
+    if (my $my_email_address = $self->config->{"my_email"}) {
+	if (0 == (grep { $_->address eq $my_email_address } $message->to)) {
+	    $doc->{'not-addressed-to-me'} = [1];
+	}
+    }
+
     for my $subject (@{$doc->{subject}}) {
         my @t = Mailsheep::Analyzer::standard($subject);
-        push @{$doc->{subject_shingle}}, Mailsheep::Analyzer::shingle(3, @t);
+        push @{$doc->{subject_shingle}}, Mailsheep::Analyzer::sorted_shingle(3, @t);
     }
     $doc->{subject_shingle} = [uniq(map { fc($_) } @{$doc->{subject_shingle}})];
 
