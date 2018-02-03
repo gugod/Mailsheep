@@ -43,10 +43,11 @@ sub execute {
     my $folder = $mgr->open("=${folder_name}", access => "rw", remove_when_empty => 0) or die "$folder_name does not exists\n";
 
     my %folder;
-
+    my %is_auto;
     for my $folder (@{$self->config->{folders}}) {
         my $category = $folder->{name};
         next if $category eq $folder_name;
+        $is_auto{$category} = $folder{auto} ? 1 : 0;
         $folder{$category} = $mgr->open("=${category}",  access => "a") or die "The mail box \"=${category}\" does not exist\n";
     }
 
@@ -61,11 +62,11 @@ sub execute {
         my $answer = $classifier->classify($doc);
         if (my $category = $answer->{category}) {
             my $op = "==";
-            if ($category ne $folder_name and my $f = $folder{$category}) {
+            if (($category ne $folder_name) && (my $f = $folder{$category}) && $is_auto{$category}) {
                 $mgr->moveMessage($f, $message) unless $opt->{dry_run};
                 $op = "<=";
             }
-            say(join("\t", $category, "==", $answer->{guess}[0]{field}, "(".join(";", @{$doc->{$answer->{guess}[0]{field}}}).")", $mail_message_subject));
+            say(join("\t", $category, $op, $answer->{guess}[0]{field}, "(".join(";", @{$doc->{$answer->{guess}[0]{field}}}).")", $mail_message_subject));
         } else {
             say(join("\t","(????)", "<=", "(????)", $mail_message_subject));
         }
