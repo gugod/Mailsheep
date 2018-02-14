@@ -60,15 +60,16 @@ sub execute {
         my $mail_message_subject = $message->head->study("subject") // "";
 
         my $answer = $classifier->classify($doc);
-        if (my $category = $answer->{category}) {
+        my $category = $answer->{category};
+        if ($category && $is_auto{$category}) {
             my $op = "==";
-            if (($category ne $folder_name) && (my $f = $folder{$category}) && $is_auto{$category}) {
+            if (($category ne $folder_name) && (my $f = $folder{$category})) {
                 $mgr->moveMessage($f, $message) unless $opt->{dry_run};
                 $op = "<=";
             }
-            say(join("\t", $category, $op, $answer->{guess}[0]{field}, "(".join(";", @{$doc->{$answer->{guess}[0]{field}}}).")", $mail_message_subject));
+            say(join("\t", $category, $op, $answer->{guess}[0]{field}, "(".join(";", @{$doc->{$answer->{guess}[0]{field}}}).")", substr($mail_message_subject, 0, 40)."..."));
         } else {
-            say(join("\t","(????)", "<=", "(????)", $mail_message_subject));
+            say(join("\t","(????)", "--", "(????)", $mail_message_subject));
         }
         if ($opt->{explain}) {
             say("\t" .$JSON->encode( $answer ) );
