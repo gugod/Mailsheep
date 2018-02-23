@@ -9,7 +9,7 @@ use Hash::Flatten qw(flatten unflatten);
 
 use File::Basename qw(basename);
 use Encode 'encode_utf8';
-use List::Util qw(sum max any);
+use List::Util qw(sum max);
 use List::MoreUtils qw(uniq);
 
 has store => (
@@ -230,13 +230,12 @@ sub classify {
 
         my %score;
         for $category (keys %$idx) {
-	    my $max_token_score = max(map{ $p{$_}{$category} } @tokens);
-            $score{$category} = $max_token_score * $category_p{$category};
+            my $score = $category_p{$category};
+            for (@tokens) {
+                $score *= $p{$_}{$category};
+            }
+            $score{$category} = $score;
         }
-
-	unless (any { $_ > 0 } values %score) {
-	    next;
-	}
 
         my @c = sort { $score{$b} <=> $score{$a} } keys %score;
 
