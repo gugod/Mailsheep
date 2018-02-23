@@ -58,8 +58,6 @@ sub convert_mail_message_to_analyzed_document {
         +{ @tok, _raw => "$_" };
     } $message->head->get("Received");
 
-    $doc->{"received.from"} = [ uniq grep { $_ } map { $_ ? split(/[ \(\)\[\]]/, $_) : () } map { $_->{from} } @received ];
-
     for my $h (keys %$doc) {
         for (@{$doc->{$h}}) {
             s/\s+//g;
