@@ -34,6 +34,8 @@ sub execute {
 
     my $folder_name = $opt->{folder};
 
+    my %count = ( processed => 0, classified => 0);
+
     my $index_directory = $self->xdg->data_home->subdir("index");
     $index_directory->mkpath() unless -d $index_directory;
 
@@ -61,20 +63,28 @@ sub execute {
 
         my $answer = $classifier->classify($doc);
         my $category = $answer->{category};
-        if ($category && $is_auto{$category}) {
+
+	if (!$category) {
+            say(join("\t","(????)", $mail_message_subject));
+	} elsif (!$is_auto{$category}) {
+	    say(join("\t","($category)", "(X)", $mail_message_subject));
+	} else {
             my $op = "==";
             if (($category ne $folder_name) && (my $f = $folder{$category})) {
                 $mgr->moveMessage($f, $message) unless $opt->{dry_run};
                 $op = "<=";
+		$count{classified} += 1;
             }
             say(join("\t", $category, $op, $answer->{guess}[0]{field}, "(".join(";", @{$doc->{$answer->{guess}[0]{field}}}).")", substr($mail_message_subject, 0, 40)."..."));
-        } else {
-            say(join("\t","(????)", "--", "(????)", $mail_message_subject));
-        }
+	}
+
         if ($opt->{explain}) {
             say("\t" .$JSON->encode( $answer ) );
         }
+	$count{processed} += 1;
     }
+
+    say "Recall: $count{classified} / $count{processed} = " . ($count{classified} / $count{processed});
 }
 
 1;
