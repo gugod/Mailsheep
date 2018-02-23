@@ -228,13 +228,20 @@ sub classify {
             }
         }
 
+        my %p_token = map { $_ => sum(values %{$p{$_}}) } @tokens;
+
         my %score;
         for $category (keys %$idx) {
-            my $score = $category_p{$category};
-            for (@tokens) {
-                $score *= $p{$_}{$category};
+            my %p_category_given_token;
+            for my $token (@tokens) {
+                my $p_token = $p_token{$token};
+                if ($p_token) {
+                    $p_category_given_token{$token} = $category_p{$category} * $p{$token}{$category} / $p_token;
+                } else {
+                    $p_category_given_token{$token} = 0;
+                }
             }
-            $score{$category} = $score;
+            $score{$category} = max(values %p_category_given_token);
         }
 
         my @c = sort { $score{$b} <=> $score{$a} } keys %score;
