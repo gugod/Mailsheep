@@ -34,7 +34,7 @@ sub execute {
 
     my $folder_name = $opt->{folder};
 
-    my %count = ( processed => 0, classified => 0);
+    my %count = ( processed => 0, classified => 0, classified_correctly => 0);
 
     my $index_directory = $self->xdg->data_home->subdir("index");
     $index_directory->mkpath() unless -d $index_directory;
@@ -69,17 +69,15 @@ sub execute {
 	} elsif ($category eq $folder_name) {
 	    say(join("\t","=", $category, $mail_message_subject));
 	    $count{classified} += 1;
+            $count{classified_correctly} += 1;
 	} elsif (!$is_auto{$category}) {
-	    say(join("\t","<", $category, $mail_message_subject));
+	    say(join("\t","~", $category, $mail_message_subject));
 	    $count{classified} += 1;
 	} else {
-            my $op = "==";
-            if (($category ne $folder_name) && (my $f = $folder{$category})) {
-                $mgr->moveMessage($f, $message) unless $opt->{dry_run};
-                $op = "<=";
-		$count{classified} += 1;
-            }
-            say(join("\t", $category, $op, $answer->{guess}[0]{field}, "(".join(";", @{$doc->{$answer->{guess}[0]{field}}}).")", substr($mail_message_subject, 0, 40)."..."));
+            my $f = $folder{$category};
+            $mgr->moveMessage($f, $message) unless $opt->{dry_run};
+            say(join("\t", "<", $category, $mail_message_subject));
+            $count{classified} += 1;
 	}
 
         if ($opt->{explain}) {
@@ -88,6 +86,8 @@ sub execute {
 	$count{processed} += 1;
     }
 
+
+    say "Precision: $count{classified_correctly} / $count{processed} = " . ($count{classified_correctly} / $count{processed});
     say "Recall: $count{classified} / $count{processed} = " . ($count{classified} / $count{processed});
 }
 
