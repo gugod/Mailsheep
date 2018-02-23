@@ -3,7 +3,7 @@ use v5.14;
 use warnings;
 
 use Moo;
-use Sereal::Encoder;
+use Sereal::Encoder qw(SRL_ZLIB);
 use Sereal::Decoder;
 use Hash::Flatten qw(flatten unflatten);
 
@@ -90,10 +90,11 @@ sub train {
     }
 
     my $ts = time;
-    my $sereal = Sereal::Encoder->new;
+    my $sereal = Sereal::Encoder->new({ compress => SRL_ZLIB });
     open my $fh, ">", File::Spec->catdir($self->store, "${category}.${ts}.sereal");
     print $fh $sereal->encode($idx);
     close($fh);
+
     $self->merge_idx($category, $idx);
     $self->cleanup_idx($category);
 
@@ -144,7 +145,7 @@ sub merge_idx {
         }
     }
 
-    $sereal = Sereal::Encoder->new;
+    $sereal = Sereal::Encoder->new({ compress => SRL_ZLIB });
     open my $fh, ">", $current_merged_idx;
     print $fh $sereal->encode($idx);
     close($fh);
