@@ -20,14 +20,15 @@ sub opt_spec {
 sub execute {
     my ($self, $opt, $args) = @_;
     my $query = join " ", @$args;
-    $query = qr/$query/;
+    utf8::decode($query);
+    $query = qr/\Q$query\E/i;
 
     $self->iterate_through_mails({
         ($opt->{folder} ? ( folder => $opt->{folder} ) : ())
     }, sub {
         my ($message) = @_;
-        my $subject = $message->subject;
-        if ($subject =~ /$query/i) {
+        my $subject = $message->head->study("subject");
+        if (defined($subject) && $subject =~ /$query/) {
             say $message->filename;
             say "\tSubject: $subject";
         }
