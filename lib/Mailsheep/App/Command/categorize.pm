@@ -65,9 +65,13 @@ sub execute {
         my $category = $answer->{category};
 
 	if (!$category) {
-            say(join("\t","(????)", $mail_message_subject));
+            say(join("\t","?", "???????", $mail_message_subject));
+	} elsif ($category eq $folder_name) {
+	    say(join("\t","=", $category, $mail_message_subject));
+	    $count{classified} += 1;
 	} elsif (!$is_auto{$category}) {
-	    say(join("\t","($category)", "(X)", $mail_message_subject));
+	    say(join("\t","<", $category, $mail_message_subject));
+	    $count{classified} += 1;
 	} else {
             my $op = "==";
             if (($category ne $folder_name) && (my $f = $folder{$category})) {
