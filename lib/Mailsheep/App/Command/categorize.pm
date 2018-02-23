@@ -49,7 +49,7 @@ sub execute {
     for my $folder (@{$self->config->{folders}}) {
         my $category = $folder->{name};
         next if $category eq $folder_name;
-        $is_auto{$category} = $folder{auto} ? 1 : 0;
+        $is_auto{$category} = $folder->{auto} ? 1 : 0;
         $folder{$category} = $mgr->open("=${category}",  access => "a") or die "The mail box \"=${category}\" does not exist\n";
     }
 
