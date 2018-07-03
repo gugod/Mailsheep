@@ -33,9 +33,9 @@ sub execute {
             say "\tSubject: $subject";
         }
     });
-    
+
     return;
 }
 
-
+no Moo;
 1;

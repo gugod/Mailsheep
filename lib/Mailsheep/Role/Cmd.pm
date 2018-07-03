@@ -24,7 +24,7 @@ sub _build_config {
     my $config_dir = $self->xdg->config_home;
     my $config_file = catfile($config_dir, "config.json");
     unless (-f $config_file) {
-        die "config file $config_file does not exist.";        
+        die "config file $config_file does not exist.";
     }
 
     open(my $fh, "<", $config_file) or die $!;

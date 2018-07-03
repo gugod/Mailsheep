@@ -35,5 +35,6 @@ sub execute {
     return;
 }
 
+no Moo;
 1;
 

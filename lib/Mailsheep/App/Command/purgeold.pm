@@ -35,7 +35,7 @@ sub execute {
         my $folder = $self->mail_box_manager->open("=${name}", access => "rw", remove_when_empty => 0);
         my $count_message = $folder->messages;
 
-        my @documents;
+        
         for my $i (0..$count_message-1) {
             my $message = $folder->message($i);
             next unless $message->label("seen") && !$message->label("flagged");
@@ -49,4 +49,5 @@ sub execute {
     }
 }
 
+no Moo;
 1;

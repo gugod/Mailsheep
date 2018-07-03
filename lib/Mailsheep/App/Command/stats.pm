@@ -23,7 +23,7 @@ sub execute {
     my $fields = [ split ",", $opt->{fields} ];
     my $aggregation = $self->aggregate($opt->{folder}, $fields, $opt->{where});
     my $message_count = $aggregation->{message_count};
-    printf("%10s %-60s\n", "Messages", join(",",@$fields));
+    printf("%10s %-60s\n", "Messages", join(",", @$fields));
     printf(("="x70)."\n");
     for (@{$aggregation->{frequency}}) {
         printf("%4.2f %10d %-60s\n", $_->[1]/$message_count, $_->[1], $_->[0]);
@@ -52,7 +52,7 @@ sub aggregate {
             for my $f (@$fields) {
                 push @term, ($f eq 'From' ? join(",", map{ $_->address} $m->from) : $m->head->study($f)) // "";
             }
-            my $term = join(",", grep { $_ } @term); 
+            my $term = join(",", grep { $_ } @term);
             for my $from (map({ $_->address } $m->from)) {
                 $aggregation{$term}++;
             }
@@ -64,5 +64,6 @@ sub aggregate {
     }
 }
 
+no Moo;
 1;
 

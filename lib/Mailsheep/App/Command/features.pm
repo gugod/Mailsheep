@@ -12,10 +12,9 @@ use Moo; with(
 );
 
 use JSON;
-use POSIX qw(floor);
 
 sub min {
-    my ($a,$b) = @_;
+    my ($a, $b) = @_;
     return ($a < $b) ? $a : $b;
 }
 
@@ -128,7 +127,7 @@ sub execute {
         die "folder is required";
     }
     $self->{folder} = $self->mail_box_manager->open("=${folder_name}", access => "ro", remove_when_empty => 0) or die "$folder_name does not exists\n";
-    
+
     $self->{opt} = $opt;
     $self->{folder_name} = $folder_name;
 
@@ -138,4 +137,5 @@ sub execute {
     $self->print_noise_features();
 }
 
+no Moo;
 1;

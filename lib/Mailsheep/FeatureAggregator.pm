@@ -53,4 +53,5 @@ sub save {
     return $self;
 }
 
+no Moo;
 1;

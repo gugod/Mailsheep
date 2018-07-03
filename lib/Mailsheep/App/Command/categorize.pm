@@ -10,9 +10,6 @@ use Moo; with(
     'Mailsheep::MailMessageConvertor'
 );
 
-use List::UtilsBy qw(max_by);
-use List::Util qw(sum);
-
 sub opt_spec {
     return (
         [ "folder=s",  "Classify unread messages from this folder", { default => "INBOX" } ],
@@ -22,7 +19,6 @@ sub opt_spec {
     );
 }
 
-use File::Slurp qw(read_file);
 use Sereal::Decoder;
 use Mailsheep::Categorizer;
 
@@ -65,13 +61,13 @@ sub execute {
         my $category = $answer->{category};
 
 	if (!$category) {
-            say(join("\t","?", "???????", $mail_message_subject));
+            say(join("\t", "?", "???????", $mail_message_subject));
 	} elsif ($category eq $folder_name) {
-	    say(join("\t","=", $category, $mail_message_subject));
+	    say(join("\t", "=", $category, $mail_message_subject));
 	    $count{classified} += 1;
             $count{classified_correctly} += 1;
 	} elsif (!$is_auto{$category}) {
-	    say(join("\t","~", $category, $mail_message_subject));
+	    say(join("\t", "~", $category, $mail_message_subject));
 	    $count{classified} += 1;
 	} else {
             my $f = $folder{$category};
@@ -86,13 +82,13 @@ sub execute {
 	$count{processed} += 1;
     }
 
-
     say "Precision: $count{classified_correctly} / $count{processed} = " . ($count{classified_correctly} / $count{processed});
     say "Recall: $count{classified} / $count{processed} = " . ($count{classified} / $count{processed});
 }
 
 1;
 
+no Moo;
 __END__
 
 mailsheep categorize =INBOX
