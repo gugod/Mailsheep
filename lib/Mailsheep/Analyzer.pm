@@ -128,5 +128,4 @@ sub standard_with_multi_shingle {
     return [ @tokens, @extra ]
 }
 
-
 1;

@@ -49,5 +49,6 @@ sub do_map_reduce {
     };
 }
 
+no Moo;
 1;
 

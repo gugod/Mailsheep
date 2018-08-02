@@ -10,7 +10,6 @@ use Hash::Flatten qw(flatten unflatten);
 use File::Basename qw(basename);
 use Encode 'encode_utf8';
 use List::Util qw(sum max);
-use List::MoreUtils qw(uniq);
 
 has store => (
     is => "ro",
@@ -140,7 +139,7 @@ sub merge_idx {
             local $/ = undef;
             my $x = $sereal->decode(<$fh>);
             __merge_idx($idx, $x, $w);
-            $w = $w * 0.9;
+            $w *=   0.9;
             close($fh);
         }
     }
@@ -277,4 +276,5 @@ sub classify {
     }
 }
 
+no Moo;
 1;

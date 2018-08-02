@@ -31,7 +31,7 @@ sub execute {
         };
     }
 
-    my %histograms;
+    
     my $histogram_interval = (defined($opt->{histogram}) ? ($opt->{histogram})*86400 : undef);
     my $now = time;
     for my $box (values %folder) {
@@ -54,7 +54,7 @@ sub execute {
 
     $mgr->closeAllFolders;
 
-    printf("%-20s %10s\n","Folder", "Messages");
+    printf("%-20s %10s\n", "Folder", "Messages");
     printf(("="x30)."\n");
     for my $box (keys %stats) {
         printf("%-20s %10d %s %s\n",
@@ -65,5 +65,6 @@ sub execute {
            );
     }
 }
+no Moo;
 1;
 

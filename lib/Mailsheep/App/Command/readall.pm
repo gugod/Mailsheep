@@ -32,4 +32,5 @@ sub execute {
     $folder->close;
 }
 
+no Moo;
 1;
