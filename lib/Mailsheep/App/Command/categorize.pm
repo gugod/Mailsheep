@@ -46,11 +46,14 @@ sub execute {
 
     my %folder;
     my %is_auto;
-    for my $folder (@{$self->config->{folders}}) {
-        my $category = $folder->{name};
-        next if $category eq $folder_name;
-        $is_auto{$category} = $folder->{auto} ? 1 : 0;
-        $folder{$category} = $mgr->open("=${category}",  access => "a") or die "The mail box \"=${category}\" does not exist\n";
+    for my $category (@{$self->config->{categories}}) {
+        my $category_name = $category->{name};
+        next if $category_name eq $folder_name;
+
+        $is_auto{$category_name} = $category->{auto} ? 1 : 0;
+
+        my $f = ($category->{folders} && $category->{folders}[0]) ? $category->{folders}[0] : $category_name;
+        $folder{$category_name} = $mgr->open("=$f",  access => "a") or die "The mail box \"=$f\" does not exist\n";
     }
 
     my $count_message = $folder->messages;

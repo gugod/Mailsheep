@@ -14,7 +14,7 @@ use Moo; with(
 sub opt_spec {
     return (
         [ "workers=n",  "The number of worker process to fork" ],
-        [ "folder=s",  "Only train this folder" ],
+        [ "category=s",  "Only train this category" ],
         [ "with-feature-aggregator", "Train with the 'FeatureAggregator' trainer"],
     );
 }
@@ -31,7 +31,7 @@ sub train_with_feature_aggregator {
 
     my $trainer = Mailsheep::FeatureAggregator->new(store => $store);
 
-    my @folders = $opt->{folder} ? ({ name => $opt->{folder} }) : (@{ $self->config->{folders} });
+    my @folders = $opt->{folder} ? ({ name => $opt->{folder} }) : (@{ $self->config->{categories} });
     for my $folder (@folders) {
         my $folder_name = $folder->{name};
         say $folder_name;
@@ -70,25 +70,32 @@ sub execute {
 
     my $classifier = Mailsheep::Categorizer->new(store => $index_directory);
 
-    my @folders = $opt->{folder} ? ({ name => $opt->{folder} }) : (@{ $self->config->{folders} });
+    my @categories = $opt->{category} ? ({ name => $opt->{category} }) : (@{ $self->config->{categories} });
     my $forkman = Parallel::ForkManager->new( $opt->{workers} ||1 );
-    for my $folder (@folders) {
+    for my $category (@categories) {
         $forkman->start and next;
-        my $folder_name = $folder->{name};
-        say $folder_name;
-        my $folder = $self->mail_box_manager->open("=${folder_name}", access => "r");
-        my $count_message = $folder->messages;
+
+        say $category->{name};
+        say "=" x length($category->{name});
+
+        my @folders = @{ $category->{folders} || [ $category->{name} ]};
 
         my @documents;
-        for my $i (0..$count_message-1) {
-            my $message = $folder->message($i);
-            next unless $message->label("seen");
-            my $doc = $self->convert_mail_message_to_analyzed_document( $message );
-            push @documents, $doc;
+
+        for my $folder_name (@folders) {
+            my $folder = $self->mail_box_manager->open("=${folder_name}", access => "r");
+            my $count_message = $folder->messages;
+
+            for my $i (0..$count_message-1) {
+                my $message = $folder->message($i);
+                next unless $message->label("seen");
+                my $doc = $self->convert_mail_message_to_analyzed_document( $message );
+                push @documents, $doc;
+            }
+            $folder->close;
         }
 
-        $classifier->train($folder_name, \@documents);
-        $folder->close;
+        $classifier->train($category->{name}, \@documents);
         $forkman->finish;
     }
     $forkman->wait_all_children;
