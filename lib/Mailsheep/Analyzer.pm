@@ -87,13 +87,13 @@ sub sorted_shingle($@) {
     return @x;
 }
 
-sub nskip_shingle {
-    my ($skip, $tokens) = @_;
+sub nskip_shingle($@) {
+    my ($skip, @tokens) = @_;
     my @x;
-    for (0..($#$tokens-$skip-1)) {
-        push @x, join " ", @{$tokens}[$_, ($_+$skip+1)];
+    for (0..($#tokens-$skip-1)) {
+        push @x, join " ", @tokens[$_, ($_+$skip+1)];
     }
-    return \@x;
+    return @x;
 }
 
 sub standard_than_shingle2 {
@@ -123,9 +123,9 @@ sub standard_with_multi_shingle {
         push @extra, shingle($_, @tokens);
     }
     for (1 .. $#tokens) {
-        push @extra, @{nskip_shingle($_, \@tokens)};
+        push @extra, nskip_shingle($_, @tokens);
     }
-    return [ @tokens, @extra ]
+    return (@tokens, @extra);
 }
 
 1;
