@@ -16,6 +16,7 @@ sub opt_spec {
         [ "dry-run",   "Do not move the message, just display the result." ],
         [ "all-message",   "Classify all messages instead of only unread ones" ],
         [ "explain",   "Explain the classifying process more verbosely." ],
+        [ "quiet",   "Supress most of the output" ],
     );
 }
 
@@ -64,18 +65,18 @@ sub execute {
         my $category = $answer->{category};
 
 	if (!$category) {
-            say(join("\t", "?", "???????", $mail_message_subject));
+            say(join("\t", "?", "???????", $mail_message_subject)) unless $opt->{quiet};
 	} elsif ($category eq $folder_name) {
-	    say(join("\t", "=", $category, $mail_message_subject));
+	    say(join("\t", "=", $category, $mail_message_subject)) unless $opt->{quiet};
 	    $count{classified} += 1;
             $count{classified_correctly} += 1;
 	} elsif (!$is_auto{$category}) {
-	    say(join("\t", "~", $category, $mail_message_subject));
+	    say(join("\t", "~", $category, $mail_message_subject)) unless $opt->{quiet};
 	    $count{classified} += 1;
 	} else {
             my $f = $folder{$category};
             $mgr->moveMessage($f, $message) unless $opt->{dry_run};
-            say(join("\t", "<", $category, $mail_message_subject));
+            say(join("\t", "<", $category, $mail_message_subject)) unless $opt->{quiet};
             $count{classified} += 1;
 	}
 
