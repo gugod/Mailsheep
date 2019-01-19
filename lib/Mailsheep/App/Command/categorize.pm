@@ -86,8 +86,12 @@ sub execute {
 	$count{processed} += 1;
     }
 
-    say "Precision: $count{classified_correctly} / $count{processed} = " . ($count{classified_correctly} / $count{processed});
-    say "Recall: $count{classified} / $count{processed} = " . ($count{classified} / $count{processed});
+    if ($count{processed}) {
+        say "Precision: $count{classified_correctly} / $count{processed} = " . ($count{classified_correctly} / $count{processed});
+        say "Recall: $count{classified} / $count{processed} = " . ($count{classified} / $count{processed});
+    } else {
+        say "Nohting is processed.";
+    }
 }
 
 1;
