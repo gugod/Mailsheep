@@ -14,7 +14,7 @@ sub opt_spec {
     return (
         [ "folder=s",  "Classify unread messages from this folder", { default => "INBOX" } ],
         [ "dry-run",   "Do not move the message, just display the result." ],
-        [ "all-message",   "Classify all messages instead of only unread ones" ],
+        [ "all-messages",   "Classify all messages instead of only unread ones" ],
         [ "explain",   "Explain the classifying process more verbosely." ],
     );
 }
