@@ -5,6 +5,7 @@ use warnings;
 local $SIG{__WARN__} = sub {
     my $warn_text = shift;
     return if $warn_text =~ /\A(given|when) is experimental/;
+    return if $warn_text =~ /\ANegative repeat count/;
     warn($warn_text);
 };
 

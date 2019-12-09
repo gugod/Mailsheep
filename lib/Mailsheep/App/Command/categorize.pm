@@ -16,6 +16,7 @@ sub opt_spec {
         [ "dry-run",   "Do not move the message, just display the result." ],
         [ "all-messages",   "Classify all messages instead of only unread ones" ],
         [ "explain",   "Explain the classifying process more verbosely." ],
+        [ "quiet",   "Supress most of the output" ],
     );
 }
 
@@ -42,11 +43,14 @@ sub execute {
 
     my %folder;
     my %is_auto;
-    for my $folder (@{$self->config->{folders}}) {
-        my $category = $folder->{name};
-        next if $category eq $folder_name;
-        $is_auto{$category} = $folder->{auto} ? 1 : 0;
-        $folder{$category} = $mgr->open("=${category}",  access => "a") or die "The mail box \"=${category}\" does not exist\n";
+    for my $category (@{$self->config->{categories}}) {
+        my $category_name = $category->{name};
+        next if $category_name eq $folder_name;
+
+        $is_auto{$category_name} = $category->{auto} ? 1 : 0;
+
+        my $f = ($category->{folders} && $category->{folders}[0]) ? $category->{folders}[0] : $category_name;
+        $folder{$category_name} = $mgr->open("=$f",  access => "a") or die "The mail box \"=$f\" does not exist\n";
     }
 
     my $count_message = $folder->messages;
@@ -61,18 +65,18 @@ sub execute {
         my $category = $answer->{category};
 
 	if (!$category) {
-            say(join("\t", "?", "???????", $mail_message_subject));
+            say(join("\t", "?", "???????", $mail_message_subject)) unless $opt->{quiet};
 	} elsif ($category eq $folder_name) {
-	    say(join("\t", "=", $category, $mail_message_subject));
+	    say(join("\t", "=", $category, $mail_message_subject)) unless $opt->{quiet};
 	    $count{classified} += 1;
             $count{classified_correctly} += 1;
 	} elsif (!$is_auto{$category}) {
-	    say(join("\t", "~", $category, $mail_message_subject));
+	    say(join("\t", "~", $category, $mail_message_subject)) unless $opt->{quiet};
 	    $count{classified} += 1;
 	} else {
             my $f = $folder{$category};
             $mgr->moveMessage($f, $message) unless $opt->{dry_run};
-            say(join("\t", "<", $category, $mail_message_subject));
+            say(join("\t", "<", $category, $mail_message_subject)) unless $opt->{quiet};
             $count{classified} += 1;
 	}
 
@@ -82,8 +86,12 @@ sub execute {
 	$count{processed} += 1;
     }
 
-    say "Precision: $count{classified_correctly} / $count{processed} = " . ($count{classified_correctly} / $count{processed});
-    say "Recall: $count{classified} / $count{processed} = " . ($count{classified} / $count{processed});
+    if ($count{processed}) {
+        say "Precision: $count{classified_correctly} / $count{processed} = " . ($count{classified_correctly} / $count{processed});
+        say "Recall: $count{classified} / $count{processed} = " . ($count{classified} / $count{processed});
+    } else {
+        say "Nohting is processed.";
+    }
 }
 
 1;
