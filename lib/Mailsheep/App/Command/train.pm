@@ -92,7 +92,7 @@ sub execute {
                 my $doc = $self->convert_mail_message_to_analyzed_document( $message );
                 push @documents, $doc;
             }
-            $folder->close;
+            $folder->close( write => 'NEVER' );
         }
 
         $classifier->train($category->{name}, \@documents);
