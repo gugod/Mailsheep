@@ -14,7 +14,7 @@ sub opt_spec {
     return (
         [ "folder=s",  "Classify unread messages from this folder", { default => "INBOX" } ],
         [ "dry-run",   "Do not move the message, just display the result." ],
-        [ "all-messages",   "Classify all messages instead of only unread ones" ],
+        [ "all",       "Classify all messages instead of only unread ones" ],
         [ "explain",   "Explain the classifying process more verbosely." ],
         [ "quiet",   "Supress most of the output" ],
     );
@@ -56,7 +56,7 @@ sub execute {
     my $count_message = $folder->messages;
     for my $i (0..$count_message-1) {
         my $message = $folder->message($i);
-        next if $message->labels()->{seen} && !($opt->{all_message});
+        next if $message->labels()->{seen} && !($opt->{all});
 
         my $doc = $self->convert_mail_message_to_analyzed_document( $message );
         my $mail_message_subject = $message->head->study("subject") // "";
