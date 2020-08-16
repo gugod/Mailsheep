@@ -17,3 +17,4 @@ requires 'Sereal::Encoder'       => '4.001';
 requires 'Time::Moment'          => '0';
 requires 'Tree::FP'              => '0.04';
 requires 'Ref::Util'             => '0';
+requires 'Importer'              => '0';

@@ -1,9 +1,18 @@
 package Mailsheep::Analyzer;
-use v5.14;
+use v5.18;
 use warnings;
 
 use List::MoreUtils qw(uniq);
 use Unicode::UCD qw(charscript);
+
+our @EXPORT_OK = qw( reduced_mail_subject );
+
+sub reduced_mail_subject {
+    my $subject = "" . ($_[0] // "");
+    $subject =~ s/\P{L}/ /g;
+    $subject =~ s/\d+/ /g;
+    return normalize_whitespace($subject);
+}
 
 sub filter_characters {
     local $_ = $_[0];

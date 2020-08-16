@@ -1,9 +1,11 @@
 package Mailsheep::MailMessageConvertor;
 use v5.18;
 use Moo::Role;
-use Mailsheep::Analyzer;
+
 use List::Gen ':modify';
 use List::MoreUtils 'uniq';
+
+use Importer 'Mailsheep::Analyzer' => 'reduced_mail_subject';
 
 sub convert_mail_message_to_simple_document {
     my ($self, $message) = @_;
@@ -45,12 +47,7 @@ sub convert_mail_message_to_analyzed_document {
         '!date'  => [ (! $message->head->get("Date")) ],
     };
 
-    my $subject = ($message->head->study("subject")  // "")."";
-    $subject =~ s/\P{L}/ /g;
-    $subject =~ s/\d+/ /g;
-    $subject =~ s/\s+/ /g;
-
-    $doc->{subject} = [ $subject ];
+    $doc->{subject} = [ reduced_mail_subject( $message->head->study("subject") ) ];
 
     for my $h (keys %$doc) {
         for (@{$doc->{$h}}) {
