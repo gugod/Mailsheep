@@ -12,12 +12,13 @@ Personal email automation.
 
 The implementation is Naive Bayes
 
-    mailsheep-train.pl
-    mailsheep-categorize.pl
+    mailsheep train
+    mailsheep categorize
 
-## Book-keeping
+## House-keeping
 
-    mailsheep-purge-old.pl
+    mailsheep readall
+    mailsheep purgeold
 
 ## Mail stats
 
