@@ -34,7 +34,7 @@ sub train_with_feature_aggregator {
     my @folders = $opt->{folder} ? ({ name => $opt->{folder} }) : (@{ $self->config->{categories} });
     for my $folder (@folders) {
         my $folder_name = $folder->{name};
-        say $folder_name;
+        say "+ $folder_name";
 
         my $folder = $self->mail_box_manager->open("=${folder_name}", access => "r");
         my $count_message = $folder->messages;
@@ -83,6 +83,7 @@ sub execute {
         my @documents;
 
         for my $folder_name (@folders) {
+            say "+ $folder_name";
             my $folder = $self->mail_box_manager->open("=${folder_name}", access => "r");
             my $count_message = $folder->messages;
 
