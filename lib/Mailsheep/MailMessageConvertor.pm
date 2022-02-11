@@ -12,11 +12,11 @@ sub convert_mail_message_to_simple_document {
     my $doc = {
         'reply-to' => [($message->head->study("reply-to") // "").""],
         'list-id'  => [(($message->head->study("List-Id") // "")."")],
-        'from'   => [ map { $_->format } $message->from ] ,
-        'sender' => [ map { $_->format } $message->sender ] ,
-        'to'     => [ map { $_->format } $message->to ],
-        subject  => [ ($message->head->study("subject")  // "")."" ],
-        'body' => [ "". $message->body->decoded ],
+        'from'     => [ map { $_->format } $message->from ] ,
+        'sender'   => [ map { $_->format } $message->sender ] ,
+        'to'       => [ map { $_->format } $message->to ],
+        'subject'  => [ ($message->head->study("subject")  // "")."" ],
+        'body'     => [ "". $message->body->decoded ],
     };
 
     for my $h (keys %$doc) {
