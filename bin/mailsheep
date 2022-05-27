@@ -9,9 +9,6 @@ local $SIG{__WARN__} = sub {
     warn($warn_text);
 };
 
-use FindBin;
-use lib "${FindBin::Bin}/../lib";
-
 use Mailsheep::App;
 
 binmode STDOUT, ":utf8";
