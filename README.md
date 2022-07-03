@@ -24,6 +24,7 @@ The implementation is Naive Bayes
 
 ## Config Example
 
+```json
 {
     "maildir": "/home/gugod/Maildir",
     "index_dir": "/home/gugod/.config/mailsheep/index",
@@ -34,3 +35,4 @@ The implementation is Naive Bayes
         { "name": "Junk",          "retention": 120 }
     ]
 }
+```
