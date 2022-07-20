@@ -1,12 +1,12 @@
 package Mailsheep::FeatureAggregator;
-
+use v5.36;
 use Moo;
 use Sereal::Encoder;
 
 has store => (
-    is => "ro",
+    is       => "ro",
     required => 1,
-    isa => sub { -d $_[0] }
+    isa      => sub { -d $_[0] }
 );
 
 =begin
@@ -25,15 +25,13 @@ attribute values over each category.
 =cut
 
 has aggs => (
-    is => "ro",
+    is      => "ro",
     default => sub {
-        return { category => {} }
+        return { category => {} };
     }
 );
 
-sub feed {
-    my ($self, $category, $features) = @_;
-
+sub feed ( $self, $category, $features ) {
     my $agg = $self->aggs->{category};
     for my $f (@$features) {
         $agg->{$f}{$category}++;
@@ -42,12 +40,11 @@ sub feed {
     return $self;
 }
 
-sub save {
-    my ($self) = @_;
-
+sub save ($self) {
     my $sereal = Sereal::Encoder->new;
-    open my $fh, ">", File::Spec->catdir($self->store, "feature_aggregation.sereal");
-    print $fh $sereal->encode($self->aggs);
+    open my $fh, ">",
+      File::Spec->catdir( $self->store, "feature_aggregation.sereal" );
+    print $fh $sereal->encode( $self->aggs );
     close($fh);
 
     return $self;
