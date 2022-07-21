@@ -1,8 +1,6 @@
 package Mailsheep::App::Command::jsonify;
 # ABSTRACT: Convert mail messages to JSON stream.
-use v5.14;
-use strict;
-use warnings;
+use v5.36;
 
 use JSON;
 use Mailsheep::App -command;
@@ -20,9 +18,7 @@ sub opt_spec {
     );
 }
 
-sub execute {
-    my ($self, $opt, $args) = @_;
-
+sub execute ($self, $opt, $args) {
     my $JSON = JSON->new->pretty->canonical;
     $self->iterate_through_mails({
         $opt->{folder} ? ( folder => $opt->{folder} ) : (),
