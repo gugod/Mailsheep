@@ -15,11 +15,14 @@ sub opt_spec {
     return (
         [ "e=s",  "Callback code that does some aggregation" ],
         [ "folder=s",  "Only this folder." ],
+        [ "pretty", "Print pretty JSON instead." ],
     );
 }
 
 sub execute ($self, $opt, $args) {
-    my $JSON = JSON->new->pretty->canonical;
+    my $JSON = JSON->new->canonical;
+    $JSON->pretty(1) if $opt->{pretty};
+
     $self->iterate_through_mails({
         $opt->{folder} ? ( folder => $opt->{folder} ) : (),
     }, sub {
