@@ -4,7 +4,7 @@ use v5.36;
 use List::MoreUtils qw(uniq);
 use Unicode::UCD    qw(charscript);
 
-our @EXPORT_OK = qw( reduced_mail_subject );
+our @EXPORT_OK = qw( reduced_mail_subject nskip_shingle );
 
 sub reduced_mail_subject {
     my $subject = "" . ( $_[0] // "" );
@@ -34,8 +34,8 @@ sub remove_spaces {
     return grep { !/\A\s*\z/u } @_;
 }
 
-sub by_script($) {
-    my $str = normalize_whitespace( $_[0] );
+sub by_script ($str) {
+    $str = normalize_whitespace( $str );
     my @tokens;
     my @chars = grep { defined($_) } split "", $str;
     return () unless @chars;
@@ -75,31 +75,20 @@ sub ngram ( $s, $gram_length ) {
     return @t;
 }
 
-sub shingle($@) {
-    my ( $size, @t ) = @_;
+sub shingle( $size, @tokens ) {
     my @x;
-    for ( 0 .. $#t + 1 - $size ) {
-        push @x, join " ", @t[ $_ .. $_ + $size - 1 ];
+    for ( 0 .. $#tokens + 1 - $size ) {
+        push @x, join " ", @tokens[ $_ .. $_ + $size - 1 ];
     }
     return @x;
 }
 
-sub sorted_shingle($@) {
-    my ( $size, @t ) = @_;
+sub nskip_shingle ($skip, $tokens) {
     my @x;
-    for ( 0 .. $#t + 1 - $size ) {
-        push @x, join " ", uniq( sort @t[ $_ .. $_ + $size - 1 ] );
+    for ( 0 .. ( $#$tokens - $skip - 1 ) ) {
+        push @x, join " ", @{$tokens}[ $_, ( $_ + $skip + 1 ) ];
     }
-    return @x;
-}
-
-sub nskip_shingle($@) {
-    my ( $skip, @tokens ) = @_;
-    my @x;
-    for ( 0 .. ( $#tokens - $skip - 1 ) ) {
-        push @x, join " ", @tokens[ $_, ( $_ + $skip + 1 ) ];
-    }
-    return @x;
+    return \@x;
 }
 
 sub standard_than_shingle2 {

@@ -1,27 +1,25 @@
 #!/usr/bin/env perl
-use v5.14;
-use strict;
-use warnings;
+use v5.36;
+use Test2::V0;
 
-use Test::More;
-
-use Mailsheep::Analyzer;
+use Importer 'Mailsheep::Analyzer' => 'nskip_shingle';
 
 my @tokens = qw< this is a pencil . that is a book >;
 
-my $ns2_tokens = Mailsheep::Analyzer::nskip_shingle(1, \@tokens);
+my $ns2_tokens = nskip_shingle(1, \@tokens);
 
-is_deeply(
+is(
     $ns2_tokens,
-    [
-        "this a",
-        "is pencil",
-        "a .",
-        "pencil that",
-        ". is",
-        "that a",
-        "is book",
-    ]
+    array {
+        item "this a";
+        item "is pencil";
+        item "a .";
+        item "pencil that";
+        item ". is";
+        item "that a";
+        item "is book";
+        end();
+    }
 );
 
 done_testing;
