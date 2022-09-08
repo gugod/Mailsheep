@@ -41,24 +41,28 @@ sub convert_mail_message_to_simple_document ( $self, $message ) {
 }
 
 sub convert_mail_message_to_analyzed_document ( $self, $message ) {
+    my $head = $message->head;
+
     my $doc = {
-        'reply-to' => [( $message->head->study("reply-to") // "" ) . ""],
-        'list-id'  => [( ( $message->head->study("List-Id") // "" ) . "" )],
+        'reply-to' => [( $head->study("reply-to") // "" ) . ""],
+        'list-id'  => [( $head->study("List-Id")  // "" ) . ""],
 
         fromish => [
             uniq(
-                $message->head->get("From"),
+                $head->get("From"),
                 ( map { ( $_->name || "" ) . "_" . ( $_->address || "" ) } $message->from ),
                 ( map { ( $_->name || "" ) . "_" . ( $_->address || "" ) } $message->sender ),
             )
         ],
 
+        'body.nrLines' => [fuzzify( $message->body->nrLines )],
+
         'to'    => [map { ( $_->name || "" ) . "_" . ( $_->address || "" ) } $message->to],
-        '!date' => [( !$message->head->get("Date") )],
+        '!date' => [( !$head->get("Date") )],
     };
 
     $doc->{subject} =
-        [reduced_mail_subject( $message->head->study("subject") )];
+        [reduced_mail_subject( $head->study("subject") )];
 
     for my $h ( keys %$doc ) {
         for ( @{ $doc->{$h} } ) {
@@ -93,6 +97,10 @@ sub convert_mail_message_to_analyzed_document ( $self, $message ) {
     delete $doc2->{'!date,to'};
 
     return $doc2;
+}
+
+sub fuzzify ($n) {
+    map { $_ * int( $n / $_ ) } map { 10**$_ } ( 0 ... log( $n + 1 ) / log(10) )
 }
 
 1;
