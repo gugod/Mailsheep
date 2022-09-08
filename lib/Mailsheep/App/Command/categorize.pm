@@ -23,7 +23,7 @@ use Sereal::Decoder;
 use Mailsheep::Categorizer;
 use JSON;
 
-sub execute ($self, $pot) {
+sub execute ($self, $opt) {
     my $folder_name = $opt->{folder};
 
     my %count = ( processed => 0, classified => 0, classified_correctly => 0);
