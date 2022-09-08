@@ -4,7 +4,7 @@ use v5.36;
 use List::MoreUtils qw(uniq);
 use Unicode::UCD    qw(charscript);
 
-our @EXPORT_OK = qw( reduced_mail_subject nskip_shingle );
+our @EXPORT_OK = qw( reduced_mail_subject nskip_shingle normalize_whitespace );
 
 sub reduced_mail_subject ($subject = "") {
     $subject =~ s/\P{L}/ /g;
