@@ -1,7 +1,6 @@
 package Mailsheep::App::Command::categorize;
 # ABSTRACT: classify and move mails to different mail folders.
-use v5.14;
-use warnings;
+use v5.36;
 
 use Mailsheep::App -command;
 
@@ -22,13 +21,9 @@ sub opt_spec {
 
 use Sereal::Decoder;
 use Mailsheep::Categorizer;
-
 use JSON;
-my $JSON = JSON->new->pretty->canonical;
 
-sub execute {
-    my ($self, $opt) = @_;
-
+sub execute ($self, $pot) {
     my $folder_name = $opt->{folder};
 
     my %count = ( processed => 0, classified => 0, classified_correctly => 0);
@@ -53,6 +48,7 @@ sub execute {
         $folder{$category_name} = $mgr->open("=$f",  access => "a") or die "The mail box \"=$f\" does not exist\n";
     }
 
+    my $JSON = JSON->new->pretty->canonical;
     my $count_message = $folder->messages;
     for my $i (0..$count_message-1) {
         my $message = $folder->message($i);

@@ -6,8 +6,7 @@ use Unicode::UCD    qw(charscript);
 
 our @EXPORT_OK = qw( reduced_mail_subject nskip_shingle );
 
-sub reduced_mail_subject {
-    my $subject = "" . ( $_[0] // "" );
+sub reduced_mail_subject ($subject = "") {
     $subject =~ s/\P{L}/ /g;
     $subject =~ s/\d+/ /g;
     return normalize_whitespace($subject);
@@ -35,9 +34,9 @@ sub remove_spaces {
 }
 
 sub by_script ($str) {
-    $str = normalize_whitespace( $str );
+    my @chars = grep { defined($_) } split "", normalize_whitespace( $str );
     my @tokens;
-    my @chars = grep { defined($_) } split "", $str;
+
     return () unless @chars;
 
     my $t = shift(@chars);
@@ -91,27 +90,26 @@ sub nskip_shingle ($skip, $tokens) {
     return \@x;
 }
 
-sub standard_than_shingle2 {
-    my @tokens   = standard( $_[0] );
+sub standard_than_shingle2 ($str) {
+    my @tokens   = standard( $str );
     my @shingles = shingle( 2, @tokens );
     return ( @tokens, @shingles );
 }
 
-sub standard_than_shingle3 {
-    my @tokens   = standard( $_[0] );
+sub standard_than_shingle3 ($str) {
+    my @tokens   = standard( $str );
     my @shingles = shingle( 3, @tokens );
     return ( @tokens, @shingles );
 }
 
-sub standard_shingle2_shingle3 {
-    my @tokens   = standard( $_[0] );
+sub standard_shingle2_shingle3 ($str) {
+    my @tokens   = standard( $str );
     my @shingle2 = shingle( 2, @tokens );
     my @shingle3 = shingle( 3, @tokens );
     return ( @tokens, @shingle2, @shingle3 );
 }
 
-sub standard_with_multi_shingle {
-    my $str    = shift;
+sub standard_with_multi_shingle ($str) {
     my @tokens = standard($str);
     my @extra;
     for ( 2 .. @tokens ) {
