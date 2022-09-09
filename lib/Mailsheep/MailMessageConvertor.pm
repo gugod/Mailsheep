@@ -42,7 +42,7 @@ sub convert_mail_message_to_simple_document ( $self, $message ) {
 
 sub convert_mail_message_to_analyzed_document ( $self, $message ) {
     my $head = $message->head;
-
+    my $body = $message->body;
     my $doc = {
         'reply-to' => [( $head->study("reply-to") // "" ) . ""],
         'list-id'  => [( $head->study("List-Id")  // "" ) . ""],
@@ -55,7 +55,7 @@ sub convert_mail_message_to_analyzed_document ( $self, $message ) {
             )
         ],
 
-        'body.nrLines' => [fuzzify( $message->body->nrLines )],
+        'body.about' => [ join("_", $body->charset // "", $body->mimeType->simplified // "", $body->nrLines // 0) ],
 
         'to'    => [map { ( $_->name || "" ) . "_" . ( $_->address || "" ) } $message->to],
         '!date' => [( !$head->get("Date") )],
@@ -97,10 +97,6 @@ sub convert_mail_message_to_analyzed_document ( $self, $message ) {
     delete $doc2->{'!date,to'};
 
     return $doc2;
-}
-
-sub fuzzify ($n) {
-    map { $_ * int( $n / $_ ) } map { 10**$_ } ( 0 ... log( $n + 1 ) / log(10) )
 }
 
 1;
