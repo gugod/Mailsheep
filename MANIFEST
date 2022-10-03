@@ -27,3 +27,4 @@ lib/Mailsheep/MailMessageConvertor.pm
 lib/Mailsheep/MailMessageIterator.pm
 lib/Mailsheep/Role/Cmd.pm
 t/analyze-nskip-shingle.t
+t/normalize-whitespace.t
