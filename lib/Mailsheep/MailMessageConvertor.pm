@@ -44,25 +44,26 @@ sub convert_mail_message_to_analyzed_document ( $self, $message ) {
     my $head = $message->head;
     my $body = $message->body;
     my $doc = {
-        'reply-to' => [( $head->study("reply-to") // "" ) . ""],
-        'list-id'  => [( $head->study("List-Id")  // "" ) . ""],
-
-        fromish => [
+        'senders' => [
             uniq(
-                $head->get("From"),
                 ( map { ( $_->name || "" ) . "_" . ( $_->address || "" ) } $message->from ),
                 ( map { ( $_->name || "" ) . "_" . ( $_->address || "" ) } $message->sender ),
+                ( $head->study("reply-to") // "" ),
+            )
+        ],
+
+        'recipients' => [
+            uniq(
+                ( map { ( $_->name || "" ) . "_" . ( $_->address || "" ) } $message->to ),
+                $head->study("List-Id")  // "",
             )
         ],
 
         'body.about' => [ join("_", $body->charset // "", $body->mimeType->simplified // "", $body->nrLines // 0) ],
-
-        'to'    => [map { ( $_->name || "" ) . "_" . ( $_->address || "" ) } $message->to],
         '!date' => [( !$head->get("Date") )],
-    };
 
-    $doc->{subject} =
-        [reduced_mail_subject( $head->study("subject") )];
+        'subject' => [reduced_mail_subject( $head->study("subject") )],
+    };
 
     for my $h ( keys %$doc ) {
         for ( @{ $doc->{$h} } ) {
@@ -93,8 +94,6 @@ sub convert_mail_message_to_analyzed_document ( $self, $message ) {
             ];
         }
     );
-
-    delete $doc2->{'!date,to'};
 
     return $doc2;
 }
