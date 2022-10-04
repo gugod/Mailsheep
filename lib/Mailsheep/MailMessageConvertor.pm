@@ -46,20 +46,21 @@ sub convert_mail_message_to_analyzed_document ( $self, $message ) {
     my $doc = {
         'senders' => [
             uniq(
-                ( map { ( $_->name || "" ) . "_" . ( $_->address || "" ) } $message->from ),
-                ( map { ( $_->name || "" ) . "_" . ( $_->address || "" ) } $message->sender ),
+                ( map { $_->format } $message->from ),
+                ( map { $_->format } $message->sender ),
                 ( $head->study("reply-to") // "" ),
             )
         ],
 
         'recipients' => [
             uniq(
-                ( map { ( $_->name || "" ) . "_" . ( $_->address || "" ) } $message->to ),
-                $head->study("List-Id")  // "",
+                ( map { $_->format } $message->destinations ),
+                $head->study("List-Id") // "",
             )
         ],
 
         'body.about' => [ join("_", $body->charset // "", $body->mimeType->simplified // "", $body->nrLines // 0) ],
+
         '!date' => [( !$head->get("Date") )],
 
         'subject' => [reduced_mail_subject( $head->study("subject") )],
