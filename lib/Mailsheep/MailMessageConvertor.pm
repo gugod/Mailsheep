@@ -59,7 +59,7 @@ sub convert_mail_message_to_analyzed_document ( $self, $message ) {
             )
         ],
 
-        'body.about' => [ join("_", $body->charset // "", $body->mimeType->simplified // "", $body->nrLines // 0) ],
+        # 'body.about' => [ join("_", $body->charset // "", $body->mimeType->simplified // "", $body->nrLines // 0) ],
 
         '!date' => [( !$head->get("Date") )],
 
