@@ -77,7 +77,11 @@ sub execute ($self, $opt, @args) {
 	}
 
         if ($opt->{explain}) {
-            say("\t" .$JSON->encode( $answer ) );
+            my $guess = $answer->{guess}[0];
+            say("\t" .JSON->new->encode([
+                $guess->{field},
+                $guess->{tokens},
+           ]));
         }
 	$count{processed} += 1;
     }
