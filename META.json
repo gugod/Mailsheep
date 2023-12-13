@@ -1,0 +1,132 @@
+{
+   "abstract" : "mail processor",
+   "author" : [
+      "Kang-min Liu"
+   ],
+   "dynamic_config" : 0,
+   "generated_by" : "App::ModuleBuildTiny version 0.043",
+   "license" : [
+      "mit"
+   ],
+   "meta-spec" : {
+      "url" : "http://search.cpan.org/perldoc?CPAN::Meta::Spec",
+      "version" : "2"
+   },
+   "name" : "Mailsheep",
+   "prereqs" : {
+      "configure" : {
+         "requires" : {
+            "Module::Build::Tiny" : "0.039"
+         }
+      },
+      "develop" : {
+         "requires" : {
+            "App::ModuleBuildTiny" : "0.043"
+         }
+      },
+      "runtime" : {
+         "requires" : {
+            "App::Cmd" : "0.327",
+            "App::Cmd::Setup" : "0",
+            "Compress::Zlib" : "0",
+            "Compress::Zstd" : "0",
+            "Digest::SHA1" : "2.13",
+            "Encode" : "0",
+            "File::Basename" : "0",
+            "File::Slurp" : "0",
+            "File::Spec::Functions" : "0",
+            "File::XDG" : "0.04",
+            "Hash::Flatten" : "1.19",
+            "Importer" : "0",
+            "JSON" : "2.90",
+            "List::Gen" : "0.974",
+            "List::MoreUtils" : "0.33",
+            "List::Util" : "0",
+            "List::UtilsBy" : "0.10",
+            "Mail::Box::Manager" : "2.115",
+            "Moo" : "1.005000",
+            "Moo::Role" : "0",
+            "Parallel::ForkManager" : "0",
+            "Path::Class" : "0",
+            "Ref::Util" : "0",
+            "Sereal::Decoder" : "4.001",
+            "Sereal::Encoder" : "4.001",
+            "Time::Moment" : "0",
+            "Tree::FP" : "0.04",
+            "Unicode::UCD" : "0",
+            "perl" : "v5.36.0",
+            "strict" : "0",
+            "warnings" : "0"
+         }
+      },
+      "test" : {
+         "requires" : {
+            "Test2::V0" : "0"
+         }
+      }
+   },
+   "provides" : {
+      "Mailsheep" : {
+         "file" : "lib/Mailsheep.pm",
+         "version" : "1.0"
+      },
+      "Mailsheep::Analyzer" : {
+         "file" : "lib/Mailsheep/Analyzer.pm"
+      },
+      "Mailsheep::App" : {
+         "file" : "lib/Mailsheep/App.pm"
+      },
+      "Mailsheep::App::Command::categorize" : {
+         "file" : "lib/Mailsheep/App/Command/categorize.pm"
+      },
+      "Mailsheep::App::Command::dropmail" : {
+         "file" : "lib/Mailsheep/App/Command/dropmail.pm"
+      },
+      "Mailsheep::App::Command::features" : {
+         "file" : "lib/Mailsheep/App/Command/features.pm"
+      },
+      "Mailsheep::App::Command::folderstats" : {
+         "file" : "lib/Mailsheep/App/Command/folderstats.pm"
+      },
+      "Mailsheep::App::Command::jsonify" : {
+         "file" : "lib/Mailsheep/App/Command/jsonify.pm"
+      },
+      "Mailsheep::App::Command::mr" : {
+         "file" : "lib/Mailsheep/App/Command/mr.pm"
+      },
+      "Mailsheep::App::Command::purgeold" : {
+         "file" : "lib/Mailsheep/App/Command/purgeold.pm"
+      },
+      "Mailsheep::App::Command::readall" : {
+         "file" : "lib/Mailsheep/App/Command/readall.pm"
+      },
+      "Mailsheep::App::Command::search" : {
+         "file" : "lib/Mailsheep/App/Command/search.pm"
+      },
+      "Mailsheep::App::Command::stats" : {
+         "file" : "lib/Mailsheep/App/Command/stats.pm"
+      },
+      "Mailsheep::App::Command::train" : {
+         "file" : "lib/Mailsheep/App/Command/train.pm"
+      },
+      "Mailsheep::Categorizer" : {
+         "file" : "lib/Mailsheep/Categorizer.pm"
+      },
+      "Mailsheep::FeatureAggregator" : {
+         "file" : "lib/Mailsheep/FeatureAggregator.pm"
+      },
+      "Mailsheep::MailMessageConvertor" : {
+         "file" : "lib/Mailsheep/MailMessageConvertor.pm"
+      },
+      "Mailsheep::MailMessageIterator" : {
+         "file" : "lib/Mailsheep/MailMessageIterator.pm"
+      },
+      "Mailsheep::Role::Cmd" : {
+         "file" : "lib/Mailsheep/Role/Cmd.pm"
+      }
+   },
+   "release_status" : "stable",
+   "version" : "1.0",
+   "x_serialization_backend" : "JSON::PP version 4.07",
+   "x_spdx_expression" : "MIT"
+}
