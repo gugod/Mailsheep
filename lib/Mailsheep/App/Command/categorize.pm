@@ -16,14 +16,76 @@ sub opt_spec {
         [ "all",       "Classify all messages instead of only unread ones" ],
         [ "explain",   "Explain the classifying process more verbosely." ],
         [ "quiet",   "Supress most of the output" ],
+        [ "with-ollama", "Using the LLM-based categorizer" ],
     );
 }
 
 use Sereal::Decoder;
 use Mailsheep::Categorizer;
+use Mailsheep::OllamaBasedCategorizer;
 use JSON;
 
 sub execute ($self, $opt, @args) {
+    if ($opt->{with_ollama}) {
+        return $self->execute_llm($opt, @args);
+    } else {
+        return $self->execute_naive($opt, @args);
+    }
+}
+
+sub execute_llm ($self, $opt, @args) {
+    my $folder_name = $opt->{folder};
+    my %count = ( processed => 0, classified => 0, classified_correctly => 0);
+
+    my @categories = map {
+        +{
+            name => $_->{name},
+            description => $_->{description}
+        }
+    } grep {
+        $_->{auto} && $_->{name} && $_->{description}
+    } @{$self->config->{categories}};
+
+    my $classifier = Mailsheep::OllamaBasedCategorizer->new(
+        categories => \@categories
+    );
+
+    my $mgr = $self->mail_box_manager;
+    my $folder = $mgr->open("=${folder_name}", access => "rw", remove_when_empty => 0) or die "$folder_name does not exists\n";
+
+    my %folder;
+    my %is_auto;
+
+    my $JSON = JSON->new->pretty->canonical;
+    my $count_message = $folder->messages;
+    for my $i (0..$count_message-1) {
+        my $message = $folder->message($i);
+        next if $message->labels()->{seen} && !($opt->{all});
+
+        my $doc = $self->convert_mail_message_to_simple_document( $message );
+        my $mail_message_subject = $message->head->study("subject") // "";
+        my $answer = $classifier->classify($doc);
+        my $category = $answer->{category};
+
+	if (!$category) {
+            say(join("\t", "?", "???????", $mail_message_subject)) unless $opt->{quiet};
+	} elsif ($category eq $folder_name) {
+	    say(join("\t", "=", $category, $mail_message_subject)) unless $opt->{quiet};
+	    $count{classified} += 1;
+            $count{classified_correctly} += 1;
+	} elsif (!$is_auto{$category}) {
+	    say(join("\t", "~", $category, $mail_message_subject)) unless $opt->{quiet};
+	    $count{classified} += 1;
+	} else {
+            my $f = $folder{$category};
+            $mgr->moveMessage($f, $message) unless $opt->{dry_run};
+            say(join("\t", "<", $category, $mail_message_subject)) unless $opt->{quiet};
+            $count{classified} += 1;
+	}
+    }
+}
+
+sub execute_naive ($self, $opt, @args) {
     my $folder_name = $opt->{folder};
 
     my %count = ( processed => 0, classified => 0, classified_correctly => 0);
