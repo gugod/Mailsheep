@@ -26,7 +26,6 @@ sub classify ( $self, $doc ) {
 
     my $doc_as_text = $JSON->encode($doc);
 
-    # TODO: Build from config.
     my $categories_with_descriptions = join "\n", map {
         $_->{name} . ": " . $_->{description}
     } (

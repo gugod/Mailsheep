@@ -40,10 +40,8 @@ sub execute_llm ($self, $opt, @args) {
     my @categories = map {
         +{
             name => $_->{name},
-            description => $_->{description}
+            description => $_->{description} // "",
         }
-    } grep {
-        $_->{auto} && $_->{name} && $_->{description}
     } @{$self->config->{categories}};
 
     my $classifier = Mailsheep::OllamaBasedCategorizer->new(
@@ -55,6 +53,15 @@ sub execute_llm ($self, $opt, @args) {
 
     my %folder;
     my %is_auto;
+    for my $category (@{$self->config->{categories}}) {
+        my $category_name = $category->{name};
+        next if $category_name eq $folder_name;
+
+        $is_auto{$category_name} = $category->{auto} ? 1 : 0;
+
+        my $f = ($category->{folders} && $category->{folders}[0]) ? $category->{folders}[0] : $category_name;
+        $folder{$category_name} = $mgr->open("=$f",  access => "a") or die "The mail box \"=$f\" does not exist\n";
+    }
 
     my $JSON = JSON->new->pretty->canonical;
     my $count_message = $folder->messages;
