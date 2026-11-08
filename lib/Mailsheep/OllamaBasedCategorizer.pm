@@ -35,19 +35,9 @@ sub classify ( $self, $doc ) {
 
     my $categories_with_descriptions = join "\n", map {
         $_->{name} . ": " . $_->{description}
-    } (
-        @{$self->categories},
-        {name => "NoneOfTheAbove", description => "When none of the above matches"}
-    );
+    } @{$self->categories};
 
-    my $category_names = [
-        map {
-            $_->{name}
-        } (
-            @{$self->categories},
-            {name => "NoneOfTheAbove", description => "When none of the above matches"}
-        )
-    ];
+    my $category_names = [ map { $_->{name} } @{$self->categories} ];
 
     my $date = localtime();
     my $response = $ollama->chat(
@@ -64,12 +54,15 @@ sub classify ( $self, $doc ) {
         "format" => {
             "type" => "object",
             "properties" => {
+                "reason" => {
+                    type => "string",
+                },
                 "category" => {
-                    "type" => "string",
-                    "enum" => $category_names,
+                    "type" => ["string", "null"],
+                    "enum" => [@$category_names, undef],
                 }
             },
-            "required" => ["category"]
+            "required" => ["category", "reason"]
         },
         "options" => {
             "temperature" => 0.0
