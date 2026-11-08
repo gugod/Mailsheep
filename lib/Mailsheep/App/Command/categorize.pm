@@ -17,6 +17,7 @@ sub opt_spec {
         [ "explain",   "Explain the classifying process more verbosely." ],
         [ "quiet",   "Supress most of the output" ],
         [ "with-ollama", "Using the LLM-based categorizer" ],
+        [ "with-ollama-model=s", "A model to be used", { default => "gemma4:e4b" } ],
     );
 }
 
@@ -45,6 +46,7 @@ sub execute_llm ($self, $opt, @args) {
     } @{$self->config->{categories}};
 
     my $classifier = Mailsheep::OllamaBasedCategorizer->new(
+        model => $opt->{with_ollama_model},
         categories => \@categories
     );
 

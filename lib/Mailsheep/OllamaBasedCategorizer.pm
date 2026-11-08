@@ -33,6 +33,15 @@ sub classify ( $self, $doc ) {
         {name => "NoneOfTheAbove", description => "When none of the above matches"}
     );
 
+    my $category_names = [
+        map {
+            $_->{name}
+        } (
+            @{$self->categories},
+            {name => "NoneOfTheAbove", description => "When none of the above matches"}
+        )
+    ];
+
     my $date = localtime();
     my $response = $ollama->chat(
         messages => [
@@ -50,15 +59,7 @@ sub classify ( $self, $doc ) {
             "properties" => {
                 "category" => {
                     "type" => "string",
-                    "enum" => [
-                        "ML",
-                        "ML-Perl",
-                        "News",
-                        "Promotion",
-                        "Junk",
-                        "Spam",
-                        "NoneOfTheAbove"
-                    ]
+                    "enum" => $category_names,
                 }
             },
             "required" => ["category"]
