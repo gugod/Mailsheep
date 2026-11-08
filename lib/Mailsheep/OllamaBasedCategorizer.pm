@@ -4,6 +4,13 @@ use Moo;
 use WebService::Ollama;
 use Ref::Util qw(is_plain_arrayref);
 
+has model => (
+    is => "ro",
+    required => 1,
+    default => "gemma4:e4b",
+);
+
+
 has categories => (
     is => "ro",
     required => 1,
@@ -21,7 +28,7 @@ sub classify ( $self, $doc ) {
 
     my $ollama = WebService::Ollama->new(
         base_url => 'http://localhost:11434',
-        model => 'gemma4:e4b'
+        model => $self->model,
     );
 
     my $doc_as_text = $JSON->encode($doc);
