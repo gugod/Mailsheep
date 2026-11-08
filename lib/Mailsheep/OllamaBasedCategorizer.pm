@@ -54,6 +54,14 @@ sub classify ( $self, $doc ) {
         "format" => {
             "type" => "object",
             "properties" => {
+                "is_known_subscribed_brand" => {
+                    "type" => "boolean",
+                    "description" => "True only if sender is a recognized subscribed brand like Rakuten, Mercari, PLOTTER, etc."
+                },
+                "has_junk_signals" => {
+                    "type" => "boolean",
+                    "description" => "True if unsolicited cold outreach, suspicious domain, language mismatch, or scam signals exist."
+                },
                 "reason" => {
                     type => "string",
                 },
