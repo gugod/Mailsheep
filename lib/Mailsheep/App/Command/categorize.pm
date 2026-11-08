@@ -65,7 +65,7 @@ sub execute_llm ($self, $opt, @args) {
 
     my $JSON = JSON->new->pretty->canonical;
     my $count_message = $folder->messages;
-    for my $i (0..$count_message-1) {
+    for my $i (reverse(0..$count_message-1)) {
         my $message = $folder->message($i);
         next if $message->labels()->{seen} && !($opt->{all});
 
